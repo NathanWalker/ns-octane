@@ -1,10 +1,9 @@
-import { Dialogs, isIOS } from "@nativescript/core";
+import { isIOS } from "@nativescript/core";
 import { useState } from "octane";
 
 export function App() {
-  // Driven into the Metal shaders as a uniform: tapping the logo pulses the
-  // heat haze and ember sheen, then it settles back.
   const [intensity, setIntensity] = useState(1);
+  const [burst, setBurst] = useState(0);
 
   return (
     <gridlayout rows="*,auto,auto,auto,*">
@@ -12,9 +11,8 @@ export function App() {
         <swiftui
           row={0}
           swiftId="octaneLogo"
-          data={{ intensity }}
-          height={140}
-          marginBottom={16}
+          data={{ intensity, burst }}
+          height={190}
           verticalAlignment="bottom"
           onSwiftUIEvent={() => {
             setIntensity(2.6);
@@ -22,14 +20,14 @@ export function App() {
           }}
         />
       ) : null}
-      <label row={1} class="text-xl text-center">
-        Try it out now
+      <label row={1} class="text-xl text-center text-octane">
+        Try it now
       </label>
-      <label row={2} class="text-2xl text-center">
-        with NativeScript 🔥
+      <label row={2} class="text-2xl text-center text-octane">
+        with NativeScript
       </label>
-      <button row={3} onTap={() => Dialogs.alert("Tapped!")} marginTop={10}>
-        Tap me for an alert
+      <button row={3} onTap={() => setBurst(burst + 1)} class="mt-10 font-bold">
+        Tap to ignite 🔥
       </button>
     </gridlayout>
   );

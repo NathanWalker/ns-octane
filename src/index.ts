@@ -1,4 +1,4 @@
-import { Application, Color, isIOS, Page } from "@nativescript/core";
+import { Application, isIOS, Page } from "@nativescript/core";
 import { registerSwiftUI, UIDataDriver } from "@nativescript/swift-ui";
 import { renderNativeScriptApp } from "./octane/driver";
 import { App } from "./app";
@@ -18,7 +18,6 @@ Application.run({
   create() {
     const page = new Page();
     page.actionBarHidden = true;
-    page.backgroundColor = new Color("#eef6f5");
 
     renderNativeScriptApp(page, App);
 

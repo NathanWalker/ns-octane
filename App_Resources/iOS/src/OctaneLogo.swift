@@ -4,6 +4,27 @@ import UIKit
 /// Bridges NativeScript's `data` property onto SwiftUI's observation system.
 final class OctaneLogoModel: ObservableObject {
 	@Published var intensity: Double = 1.0
+
+	/// Monotonic token from NativeScript. Only a *change* arms a burst, so the
+	/// same value arriving again (any unrelated `data` update) is inert.
+	@Published private(set) var burstToken: Int = 0
+
+	private var burstStart: Date?
+	private let burstDuration: TimeInterval = 1.15
+
+	func arm(token: Int) {
+		guard token != burstToken else { return }
+		burstToken = token
+		// Timing lives here rather than in JavaScript: the bridge only says
+		// "go", and the 60fps ramp stays on the UI thread.
+		burstStart = Date()
+	}
+
+	func burstProgress(at date: Date) -> Double {
+		guard let start = burstStart else { return 0 }
+		let elapsed = date.timeIntervalSince(start)
+		return elapsed >= burstDuration ? 0 : elapsed / burstDuration
+	}
 }
 
 struct OctaneLogoView: View {
@@ -19,6 +40,7 @@ struct OctaneLogoView: View {
 	var body: some View {
 		TimelineView(.animation) { context in
 			let time = context.date.timeIntervalSince(start)
+			let burst = model.burstProgress(at: context.date)
 
 			// The padding sits outside the reader so `geometry.size` is the box
 			// the artwork actually occupies — the shaders normalise position by
@@ -44,6 +66,15 @@ struct OctaneLogoView: View {
 							.float2(geometry.size),
 							.float(model.intensity)
 						)
+					)
+					// Layered last so the shatter samples the already-hazed,
+					// already-lit mark rather than the flat artwork.
+					.layerEffect(
+						ShaderLibrary.octaneShatter(
+							.float2(geometry.size),
+							.float(burst)
+						),
+						maxSampleOffset: CGSize(width: 140, height: 90)
 					)
 			}
 			.padding(.horizontal, 24)
@@ -78,6 +109,9 @@ class OctaneLogoProvider: UIViewController, SwiftUIProvider {
 	func updateData(data: NSDictionary) {
 		if let intensity = data["intensity"] as? NSNumber {
 			model.intensity = intensity.doubleValue
+		}
+		if let burst = data["burst"] as? NSNumber {
+			model.arm(token: burst.intValue)
 		}
 	}
 
