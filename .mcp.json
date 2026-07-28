@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "nativescript-docs": {
+      "type": "http",
+      "url": "https://docs.nativescript.org/mcp"
+    }
+  }
+}

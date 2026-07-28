@@ -1,26 +1,40 @@
 {
   "name": "ns-octane",
-  "main": "src/app.ts",
+  "main": "src/index.ts",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@nativescript/core": "~9.0.0",
-    "react": "^18.2.0",
-    "react-nativescript": "^5.0.0",
-    "react-nativescript-navigation": "^5.0.0"
+    "@nativescript-community/react": "^19.0.0",
+    "@nativescript/core": "9.1.0-alpha.11",
+    "@valor/nativescript-websockets": "^2.0.2",
+    "dominative": "^0.1.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@nativescript/android": "9.1.0-alpha.8",
+    "@nativescript/ios": "9.1.0-alpha.17",
     "@nativescript/types": "~9.0.0",
-    "@nativescript/webpack": "~5.0.28",
-    "@types/react": "npm:types-react-without-jsx-intrinsics@^18.0.17",
-    "typescript": "~5.4.0"
+    "@nativescript/vite": "8.0.0-alpha.69",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vue/compiler-sfc": "^3.5.40",
+    "nativescript": "alpha",
+    "patch-package": "^8.0.1",
+    "react-reconciler": "^0.32.0",
+    "typescript": "~6.0.0",
+    "vite": "^8.0.0"
   },
   "scripts": {
+    "android": "ns debug android --no-hmr",
+    "ios": "ns debug ios --no-hmr",
     "type-check": "tsc --noEmit"
   },
   "overrides": {
-    "@nativescript/core": "~9.0.0"
+    "@nativescript/core": "9.1.0-alpha.11",
+    "react": "^19.2.0"
   },
-  "gitHead": "1350d382fb4b0ed4c6e9685df909518b2688e004",
   "readme": "NativeScript Application"
 }

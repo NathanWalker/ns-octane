@@ -7,15 +7,18 @@
     "emitDecoratorMetadata": true,
     "noEmitHelpers": true,
     "noEmitOnError": true,
-    "jsx": "react",
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "nativescript-jsx",
     "lib": ["ESNext", "dom"],
-    "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"],
-      "@/*": ["src/*"]
+      "~/*": ["./src/*"],
+      "@/*": ["./src/*"],
+      "nativescript-jsx/jsx-runtime": ["./types/nativescript-jsx/jsx-runtime.d.ts"],
+      "nativescript-jsx/jsx-dev-runtime": ["./types/nativescript-jsx/jsx-dev-runtime.d.ts"]
     }
   },
-  "include": ["./src/**/*.tsx?"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./types/**/*.d.ts"],
   "files": ["./references.d.ts"],
   "exclude": ["node_modules", "platforms"]
 }
