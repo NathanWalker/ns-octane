@@ -1,23 +1,32 @@
-import type * as NS from '@nativescript/core';
-import type { Key, ReactNode, Ref } from 'react';
-
 /**
- * Tag names are all-lowercase because `@nativescript-community/react` aliases
- * dominative's PascalCase registry with a single `tag.toLowerCase()` pass. There
- * is no camelCase alias — `<gridLayout>` resolves to nothing and renders blank.
+ * JSX intrinsic elements for the NativeScript renderer.
+ *
+ * Tag names are all-lowercase, matching the keys the driver's element registry
+ * instantiates. Props are derived from the installed `@nativescript/core` view
+ * classes, so inherited attributes come along for free and the set tracks the
+ * core version in `package.json` rather than a hand-maintained list.
+ *
+ * TypeScript resolves this namespace through the `jsxImportSource` mapping in
+ * `tsconfig.json`; the Octane compiler resolves it through `intrinsics` in
+ * `src/octane/config.ts`.
  */
+import type * as NS from '@nativescript/core';
+import type { SwiftUI } from '@nativescript/swift-ui';
+
+export type NativeScriptNode = unknown;
+
+type Ref<TInstance> = ((instance: TInstance | null) => void) | { current: TInstance | null } | null;
 
 /**
- * The renderer applies non-event props with `setAttribute(name, value)`, which
- * dominative assigns straight onto the view instance. A JSX attribute is
- * therefore a NativeScript view property, not a stringified DOM attribute.
+ * The driver assigns every non-event prop onto the view instance, so a JSX
+ * attribute is a NativeScript view property rather than a DOM attribute.
  */
 type ViewProperties<TInstance> = {
 	[K in keyof TInstance as TInstance[K] extends (...args: never[]) => unknown ? never : K]?: TInstance[K];
 };
 
-/** dominative dispatches the raw NativeScript payload, tagged with `type`. */
-type NSEventData<TInstance> = NS.EventData & { object: TInstance; type: string };
+/** NativeScript hands the raw event payload to the listener. */
+type NSEventData<TInstance> = NS.EventData & { object: TInstance };
 
 type NSGestureData<TInstance> = NS.GestureEventData & { object: TInstance };
 
@@ -34,8 +43,7 @@ type DerivedEvents<TClass, TInstance> = {
 
 /**
  * Gestures are available on every view rather than declared as `static …Event`,
- * and the renderer aliases a handful of web-ish names onto NativeScript events
- * (see `EVENT_ALIASES` in `@nativescript-community/react/src/props.js`).
+ * and the driver aliases a few web-shaped names onto NativeScript events.
  */
 interface CommonEvents<TInstance> {
 	onTap?: (event: NSGestureData<TInstance>) => void;
@@ -59,10 +67,10 @@ interface CommonEvents<TInstance> {
 }
 
 interface CommonAttributes {
-	/** Forwarded to NativeScript's `class`, which resolves against `app.css`. */
+	/** Resolved against `app.css`. */
 	className?: string;
 	class?: string;
-	/** A string is set as the `style` attribute; an object is assigned onto `view.style`. */
+	/** A string is parsed as inline CSS; an object is assigned onto `view.style`. */
 	style?: string | Partial<NS.Style>;
 
 	/**
@@ -83,13 +91,13 @@ interface CommonAttributes {
 	order?: number | string;
 }
 
-interface ReactAttributes<TInstance> {
-	key?: Key | null;
-	ref?: Ref<TInstance>;
-	children?: ReactNode;
+interface OctaneAttributes<TInstance> {
+	key?: string | number;
+	ref?: Ref<TInstance> | readonly Ref<TInstance>[];
+	children?: NativeScriptNode;
 }
 
-type Overridden = keyof CommonAttributes | keyof ReactAttributes<unknown> | keyof CommonEvents<unknown>;
+type Overridden = keyof CommonAttributes | keyof OctaneAttributes<unknown> | keyof CommonEvents<unknown>;
 
 type Attributes<TClass extends abstract new (...args: never[]) => unknown> = Omit<
 	ViewProperties<InstanceType<TClass>> & DerivedEvents<TClass, InstanceType<TClass>>,
@@ -97,20 +105,7 @@ type Attributes<TClass extends abstract new (...args: never[]) => unknown> = Omi
 > &
 	CommonAttributes &
 	CommonEvents<InstanceType<TClass>> &
-	ReactAttributes<InstanceType<TClass>>;
-
-/**
- * dominative's virtual elements carry data into templated views instead of
- * rendering. `key` is unusable here — React consumes it before the renderer
- * sees it, so set the prop name via `attr` on `ItemTemplate` consumers.
- */
-interface VirtualElementAttributes {
-	key?: Key | null;
-	type?: string;
-	value?: unknown;
-	class?: string;
-	children?: ReactNode;
-}
+	OctaneAttributes<InstanceType<TClass>>;
 
 export interface NativeScriptElements {
 	absolutelayout: Attributes<typeof NS.AbsoluteLayout>;
@@ -152,8 +147,21 @@ export interface NativeScriptElements {
 	webview: Attributes<typeof NS.WebView>;
 	wraplayout: Attributes<typeof NS.WrapLayout>;
 
-	prop: VirtualElementAttributes;
-	keyprop: VirtualElementAttributes;
-	arrayprop: VirtualElementAttributes;
-	itemtemplate: VirtualElementAttributes;
+	/** `@nativescript/swift-ui` host. `swiftId` selects a registered provider. */
+	swiftui: Omit<Attributes<typeof NS.ContentView>, 'children'> & {
+		swiftId: string;
+		/** Sent to the provider's `updateData(data:)`. */
+		data?: Record<string, unknown>;
+		onSwiftUIEvent?: (event: NS.EventData & { data: unknown }) => void;
+		ref?: ((instance: SwiftUI | null) => void) | { current: SwiftUI | null } | null;
+	};
+}
+
+export namespace JSX {
+	export interface IntrinsicElements extends NativeScriptElements {}
+	export interface ElementChildrenAttribute {
+		children: {};
+	}
+	export type Element = unknown;
+	export type ElementType = string | ((props: any) => unknown);
 }

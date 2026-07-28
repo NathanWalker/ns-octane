@@ -8,17 +8,16 @@
     "noEmitHelpers": true,
     "noEmitOnError": true,
     "skipLibCheck": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "jsxImportSource": "nativescript-jsx",
-    "lib": ["ESNext", "dom"],
+    "lib": ["ESNext"],
     "paths": {
       "~/*": ["./src/*"],
       "@/*": ["./src/*"],
-      "nativescript-jsx/jsx-runtime": ["./types/nativescript-jsx/jsx-runtime.d.ts"],
-      "nativescript-jsx/jsx-dev-runtime": ["./types/nativescript-jsx/jsx-dev-runtime.d.ts"]
+      "nativescript-jsx/jsx-runtime": ["./src/octane/intrinsics.ts"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./types/**/*.d.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "files": ["./references.d.ts"],
   "exclude": ["node_modules", "platforms"]
 }
