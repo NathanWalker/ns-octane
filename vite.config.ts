@@ -1,10 +1,7 @@
-import { defineConfig, mergeConfig } from "vite";
-import { typescriptConfig } from "@nativescript/vite/typescript";
-import { octane } from "@octanejs/vite-plugin";
+import { defineConfig } from "vite";
+import { octaneConfig } from "@nativescript/vite-octane";
 import { nativeScriptRenderers } from "./src/octane/config";
 
-export default defineConfig(({ mode }) => {
-  return mergeConfig(typescriptConfig({ mode }), {
-    plugins: [octane({ renderers: nativeScriptRenderers })],
-  });
-});
+export default defineConfig(({ mode }) =>
+  octaneConfig({ mode }, { octane: { renderers: nativeScriptRenderers } }),
+);

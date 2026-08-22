@@ -40,9 +40,44 @@ import {
 	WrapLayout,
 } from '@nativescript/core';
 import { SwiftUI } from '@nativescript/swift-ui';
+import { Embers } from '../elements/embers';
 
-/** Lowercase tag name -> view constructor. Keys must match `intrinsics.ts`. */
-export const ELEMENTS = new Map<string, new () => ViewBase>([
+export type ElementConstructor = new () => ViewBase;
+
+/**
+ * Lowercase tag name -> view constructor. Keys must match `intrinsics.ts`.
+ *
+ * The map itself lives in `import.meta.hot.data`, so under HMR it is the same
+ * object across re-evaluations of this module: the driver keeps the binding it
+ * imported at boot, and a hot update to this file re-populates that map in
+ * place. That is what lets a tag registered here reach a running app without
+ * remounting it, and why this module accepts its own updates below.
+ */
+export const ELEMENTS: Map<string, ElementConstructor> = import.meta.hot?.data.elements ?? new Map();
+
+type ElementReplacedListener = (tag: string, element: ElementConstructor) => void;
+
+/** Lives beside the map in `hot.data` for the same reason: the driver subscribes once, at boot. */
+const replacedListeners: Set<ElementReplacedListener> = import.meta.hot?.data.elementListeners ?? new Set();
+
+/** Register (or replace) the view class a tag instantiates. Replacing notifies `onElementReplaced` listeners. */
+export function registerElement(tag: string, element: ElementConstructor): void {
+	const previous = ELEMENTS.get(tag);
+	ELEMENTS.set(tag, element);
+	if (previous !== undefined && previous !== element) {
+		for (const listener of replacedListeners) listener(tag, element);
+	}
+}
+
+/** Observe a tag's class being replaced — the driver recreates live instances. Returns the unsubscribe. */
+export function onElementReplaced(listener: ElementReplacedListener): () => void {
+	replacedListeners.add(listener);
+	return () => {
+		replacedListeners.delete(listener);
+	};
+}
+
+const BUILTIN_ELEMENTS: ReadonlyArray<[string, ElementConstructor]> = [
 	['absolutelayout', AbsoluteLayout],
 	['actionbar', ActionBar],
 	['actionitem', ActionItem],
@@ -82,7 +117,16 @@ export const ELEMENTS = new Map<string, new () => ViewBase>([
 	['webview', WebView],
 	['wraplayout', WrapLayout],
 	['swiftui', SwiftUI as unknown as new () => ViewBase],
-]);
+	['embers', Embers],
+];
+
+for (const [tag, element] of BUILTIN_ELEMENTS) registerElement(tag, element);
+
+if (import.meta.hot) {
+	import.meta.hot.data.elements = ELEMENTS;
+	import.meta.hot.data.elementListeners = replacedListeners;
+	import.meta.hot.accept();
+}
 
 /**
  * Web-shaped handler names NativeScript spells differently. Anything else

@@ -12,6 +12,7 @@
  */
 import type * as NS from '@nativescript/core';
 import type { SwiftUI } from '@nativescript/swift-ui';
+import type { Embers } from '../elements/embers';
 
 export type NativeScriptNode = unknown;
 
@@ -148,13 +149,16 @@ export interface NativeScriptElements {
 	wraplayout: Attributes<typeof NS.WrapLayout>;
 
 	/** `@nativescript/swift-ui` host. `swiftId` selects a registered provider. */
-	swiftui: Omit<Attributes<typeof NS.ContentView>, 'children'> & {
+	swiftui: Omit<Attributes<typeof NS.ContentView>, 'children' | 'ref'> & {
 		swiftId: string;
 		/** Sent to the provider's `updateData(data:)`. */
 		data?: Record<string, unknown>;
 		onSwiftUIEvent?: (event: NS.EventData & { data: unknown }) => void;
 		ref?: ((instance: SwiftUI | null) => void) | { current: SwiftUI | null } | null;
 	};
+
+	/** Rising ember particles — an element this app defines itself; see `src/elements/embers.ts`. */
+	embers: Attributes<typeof Embers>;
 }
 
 export namespace JSX {

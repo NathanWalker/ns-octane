@@ -18,7 +18,7 @@ import {
 	type UniversalRoot,
 } from 'octane/universal/native';
 import { NATIVESCRIPT_RENDERER_ID } from './config';
-import { ELEMENTS, EVENT_PROP, eventNameFor } from './elements';
+import { ELEMENTS, EVENT_PROP, eventNameFor, onElementReplaced } from './elements';
 
 /** `#text` nodes carry no view; the driver folds them into the parent's `text`. */
 const TEXT = '#text';
@@ -26,7 +26,8 @@ const TEXT = '#text';
 interface HostNode {
 	readonly id: number;
 	readonly type: string;
-	readonly view: ViewBase | null;
+	/** Replaced in place when the tag's class is re-registered; `null` for `#text`. */
+	view: ViewBase | null;
 	text: string;
 	props: Readonly<Record<string, unknown>>;
 	parent: HostNode | null;
@@ -266,6 +267,44 @@ function disposeListeners(node: HostNode): void {
 	node.listeners.clear();
 }
 
+/**
+ * Swap a node's native view for a fresh instance of its (re-registered) class:
+ * the new view takes over the node's props, listeners, children and position.
+ */
+function recreateView(container: NativeScriptContainer, node: HostNode): void {
+	const previous = node.view;
+	if (previous === null) return;
+	const parentView = hostViewOf(container, node.parent);
+	for (const child of node.children) {
+		if (child.view !== null) removeViewChild(previous, child.view);
+	}
+	if (parentView !== null) removeViewChild(parentView, previous);
+	for (const [type, handler] of node.listeners) previous.off(type, handler);
+
+	const view = instantiate(node.type);
+	node.view = view;
+	node.textApplied = false;
+	applyProps(node, node.props);
+	for (const [type, handler] of node.listeners) view.on(type, handler);
+	let index = 0;
+	for (const child of node.children) {
+		if (child.view !== null) addViewChild(view, child.view, index++);
+	}
+	syncText(node);
+	attach(container, node);
+}
+
+const containers = new Set<NativeScriptContainer>();
+
+const stopWatchingElements = onElementReplaced((tag) => {
+	for (const container of containers) {
+		for (const node of container.nodes.values()) {
+			if (node.type === tag) recreateView(container, node);
+		}
+	}
+});
+import.meta.hot?.dispose(stopWatchingElements);
+
 /** A non-numeric parent is the root container; portals are not enabled. */
 function resolveParent(container: NativeScriptContainer, parent: unknown): HostNode | null {
 	return typeof parent === 'number' ? expect(container, parent) : null;
@@ -392,5 +431,6 @@ export function createNativeScriptRoot(host: ViewBase): UniversalRoot {
 		},
 	});
 	container.root = root;
+	containers.add(container);
 	return root;
 }
