@@ -30,7 +30,7 @@ integration is four small modules in [`src/octane/`](src/octane/), following the
 | [`intrinsics.ts`](src/octane/intrinsics.ts) | JSX element types, derived from the core view classes |
 | [`elements.ts`](src/octane/elements.ts) | Tag name → view constructor (a hot registry, see below), plus event-name aliasing |
 
-`vite.config.ts` uses [`@nativescript-community/vite-octane`](https://github.com/NativeScript/octane),
+`vite.config.ts` uses [`@nativescript-community/vite-octane`](https://github.com/nativescript-community/octane),
 the Octane flavor for `@nativescript/vite`: it runs `@octanejs/vite-plugin` with the renderer
 scoped to `src/**/*.tsx` by rule and registers the Octane HMR strategy. Everything else stays
 untouched.
