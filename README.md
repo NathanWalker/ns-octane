@@ -122,6 +122,6 @@ npm run ios:no-hmr       # the bundled, non-HMR dev path
 ```
 
 Requires the NativeScript 9.1 runtimes (`@nativescript/ios`, `@nativescript/android`) — the
-HMR boot depends on the `ns:module` builtin they introduce. `@nativescript/vite` and
-`@nativescript-community/vite-octane` install from prerelease tarballs in [`vendor/`](vendor/) until the
-versions carrying the framework-flavor API are published.
+HMR boot depends on the `ns:module` builtin they introduce — and `@nativescript/vite`
+`8.0.0-dev.0` or later, the line that carries the framework-flavor API
+`@nativescript-community/vite-octane` is built on.
