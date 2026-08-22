@@ -30,7 +30,7 @@ integration is four small modules in [`src/octane/`](src/octane/), following the
 | [`intrinsics.ts`](src/octane/intrinsics.ts) | JSX element types, derived from the core view classes |
 | [`elements.ts`](src/octane/elements.ts) | Tag name → view constructor (a hot registry, see below), plus event-name aliasing |
 
-`vite.config.ts` uses [`@nativescript/vite-octane`](https://github.com/NativeScript/octane),
+`vite.config.ts` uses [`@nativescript-community/vite-octane`](https://github.com/NativeScript/octane),
 the Octane flavor for `@nativescript/vite`: it runs `@octanejs/vite-plugin` with the renderer
 scoped to `src/**/*.tsx` by rule and registers the Octane HMR strategy. Everything else stays
 untouched.
@@ -49,7 +49,7 @@ Three details worth knowing before editing:
 `ns debug ios` starts the Vite dev server and the app boots over HTTP ESM, as described in the
 [NativeScript 9.1 release notes](https://blog.nativescript.org/nativescript-9-1-announcement).
 Octane's compiler wraps every exported component in `hmrUniversalComponent` and emits
-`import.meta.hot.accept(...)`; the strategy in `@nativescript/vite-octane` sequences the
+`import.meta.hot.accept(...)`; the strategy in `@nativescript-community/vite-octane` sequences the
 registry around that. A save lands in one of four ways, and the log says which:
 
 | You edit | What happens | Log line |
@@ -123,5 +123,5 @@ npm run ios:no-hmr       # the bundled, non-HMR dev path
 
 Requires the NativeScript 9.1 runtimes (`@nativescript/ios`, `@nativescript/android`) — the
 HMR boot depends on the `ns:module` builtin they introduce. `@nativescript/vite` and
-`@nativescript/vite-octane` install from prerelease tarballs in [`vendor/`](vendor/) until the
+`@nativescript-community/vite-octane` install from prerelease tarballs in [`vendor/`](vendor/) until the
 versions carrying the framework-flavor API are published.

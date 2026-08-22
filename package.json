@@ -10,12 +10,12 @@
     "octane": "0.1.43"
   },
   "devDependencies": {
+    "@nativescript-community/vite-octane": "file:vendor/nativescript-community-vite-octane-0.1.0.tgz",
     "@nativescript/android": "^9.1.0-alpha.11",
     "@nativescript/ios": "9.1.0-rc.0",
     "@nativescript/tailwind": "^4.0.9",
     "@nativescript/types": "~9.0.0",
     "@nativescript/vite": "file:vendor/nativescript-vite-8.0.0-octane.tgz",
-    "@nativescript/vite-octane": "file:vendor/nativescript-vite-octane-0.1.0.tgz",
     "@octanejs/vite-plugin": "0.1.43",
     "@types/node": "^22.10.2",
     "@vue/compiler-sfc": "^3.5.40",
