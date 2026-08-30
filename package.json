@@ -4,22 +4,22 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@nativescript/core": "9.1.0-next.4",
+    "@nativescript/core": "~9.1.0",
     "@nativescript/swift-ui": "^4.0.2",
     "@valor/nativescript-websockets": "^2.0.2",
     "octane": "0.1.43"
   },
   "devDependencies": {
     "@nativescript-community/vite-octane": "^0.1.1",
-    "@nativescript/android": "^9.1.0-alpha.11",
-    "@nativescript/ios": "9.1.0-rc.0",
+    "@nativescript/android": "~9.1.0",
+    "@nativescript/ios": "~9.1.0",
     "@nativescript/tailwind": "^4.0.9",
     "@nativescript/types": "~9.0.0",
-    "@nativescript/vite": "8.0.0-dev.0",
+    "@nativescript/vite": "8.0.1-rc.0",
     "@octanejs/vite-plugin": "0.1.43",
     "@types/node": "^22.10.2",
     "@vue/compiler-sfc": "^3.5.40",
-    "nativescript": "9.1.0-next.2026-08-19-32291405575",
+    "nativescript": "~9.1.0",
     "patch-package": "^8.0.1",
     "tailwindcss": "^4.3.3",
     "typescript": "~5.9.3",
@@ -33,8 +33,8 @@
     "type-check": "tsc --noEmit"
   },
   "overrides": {
-    "@nativescript/core": "9.1.0-next.4",
-    "react": "^19.2.0"
+    "@nativescript/core": "~9.1.0",
+    "@nativescript/vite": "8.0.1-rc.0"
   },
   "readme": "NativeScript Application"
 }
