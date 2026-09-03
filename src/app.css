@@ -32,7 +32,9 @@ Page {
   background-color: #ffffff;
 }
 
-.ns-dark Page {
+/* The Page is the root view, so it carries `ns-dark` itself; a descendant
+   selector would never match it. */
+Page.ns-dark {
   background-color: #212121;
 }
 

@@ -67,9 +67,13 @@ export function DrawerPanel({ onClose, onSettings }: DrawerPanelProps) {
         />
       </gridlayout>
 
+      {/* Rows inset from the panel edge opt out of safe-area handling: the
+          panel already owns the screen edge, and core's overflow expansion,
+          evaluated on the first layout while the closed panel sits off-screen,
+          would otherwise pull them out to the edge and never re-evaluate. */}
       <stacklayout row={1} class="px-3">
         {NAV_ITEMS.map((item) => (
-          <gridlayout key={item.text} rows="auto" columns="auto, *" class="p-2.5 rounded-xl" onTap={() => tapHaptic()}>
+          <gridlayout key={item.text} rows="auto" columns="auto, *" class="p-2.5 rounded-xl" iosIgnoreSafeArea={true} onTap={() => tapHaptic()}>
             <SfIcon
               col={0}
               name={item.sf}
@@ -110,6 +114,7 @@ export function DrawerPanel({ onClose, onSettings }: DrawerPanelProps) {
           col={0}
           columns="auto, auto"
           class="chat-fab"
+          iosIgnoreSafeArea={true}
           onTap={() => {
             tapHaptic();
             newChat();
