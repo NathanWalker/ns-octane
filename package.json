@@ -4,34 +4,44 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@nativescript/core": "9.1.0-alpha.11",
+    "@nativescript-community/octane": "^0.2.0",
+    "@nativescript-community/ui-drawer": "^0.1.32",
+    "@nativescript/core": "~9.1.0",
+    "@nativescript/haptics": "^3.1.0",
+    "@nativescript/input-accessory": "1.0.3",
     "@nativescript/swift-ui": "^4.0.2",
+    "@nstudio/nativescript-menu": "^1.0.5",
+    "@nstudio/nstreamdown": "~1.0.8",
     "@valor/nativescript-websockets": "^2.0.2",
-    "octane": "^0.1.17"
+    "octane": "0.2.2"
   },
   "devDependencies": {
-    "@nativescript/android": "9.1.0-alpha.8",
-    "@nativescript/ios": "9.1.0-alpha.17",
-    "@nativescript/tailwind": "^4.0.9",
+    "@nativescript-community/vite-octane": "^0.2.0",
+    "@nativescript/android": "~9.1.0",
+    "@nativescript/ios": "~9.1.0",
+    "@nativescript/tailwind": "^4.0.10",
     "@nativescript/types": "~9.0.0",
-    "@nativescript/vite": "8.0.0-alpha.69",
-    "@octanejs/vite-plugin": "^0.1.17",
+    "@nativescript/vite": "~8.0.4",
+    "@octanejs/vite-plugin": "0.1.52",
     "@types/node": "^22.10.2",
     "@vue/compiler-sfc": "^3.5.40",
-    "nativescript": "alpha",
+    "nativescript": "~9.1.0",
     "patch-package": "^8.0.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.0",
+    "typescript": "~5.9.3",
     "vite": "^8.0.0"
   },
   "scripts": {
-    "android": "ns debug android --no-hmr",
-    "ios": "ns debug ios --no-hmr",
-    "type-check": "tsc --noEmit"
+    "android": "ns debug android",
+    "ios": "ns debug ios",
+    "android:no-hmr": "ns debug android --no-hmr",
+    "ios:no-hmr": "ns debug ios --no-hmr",
+    "type-check": "tsc --noEmit",
+    "postinstall": "patch-package"
   },
   "overrides": {
-    "@nativescript/core": "9.1.0-alpha.11",
-    "react": "^19.2.0"
+    "@nativescript/core": "~9.1.0",
+    "@nativescript/vite": "~8.0.4"
   },
   "readme": "NativeScript Application"
 }

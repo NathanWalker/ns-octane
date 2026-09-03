@@ -9,5 +9,5 @@ export default {
     markingMode: 'none'
   },
   bundler: 'vite',
-  bundlerConfigPath: 'vite.config.ts'
+  bundlerConfigPath: 'vite.config.mts'
 } as NativeScriptConfig;

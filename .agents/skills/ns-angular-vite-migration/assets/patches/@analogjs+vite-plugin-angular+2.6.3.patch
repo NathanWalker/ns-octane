@@ -1,0 +1,186 @@
+diff --git a/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.d.ts b/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.d.ts
+index 6d8ef5e..5b23962 100644
+--- a/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.d.ts
++++ b/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.d.ts
+@@ -29,6 +29,11 @@ export interface PluginOptions {
+     include?: string[];
+     additionalContentDirs?: string[];
+     liveReload?: boolean;
++    /**
++     * Emit component styles as runtime URL references when live reload is enabled.
++     * Defaults to true; non-DOM runtimes such as NativeScript should pass false.
++     */
++    externalRuntimeStyles?: boolean;
+     disableTypeChecking?: boolean;
+     fileReplacements?: FileReplacement[];
+     /**
+diff --git a/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.js b/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.js
+index 3a61301..39b9074 100644
+--- a/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.js
++++ b/node_modules/@analogjs/vite-plugin-angular/src/lib/angular-vite-plugin.js
+@@ -1,5 +1,6 @@
+ import { mkdirSync, writeFileSync } from 'node:fs';
+-import { basename, dirname, isAbsolute, join, relative, resolve, } from 'node:path';
++import { basename, dirname, extname, isAbsolute, join, relative, resolve, } from 'node:path';
++import { pathToFileURL } from 'node:url';
+ import * as vite from 'vite';
+ import * as compilerCli from '@angular/compiler-cli';
+ import { createRequire } from 'node:module';
+@@ -35,6 +36,35 @@ export var DiagnosticModes;
+     DiagnosticModes[DiagnosticModes["All"] = 7] = "All";
+ })(DiagnosticModes || (DiagnosticModes = {}));
+ const classNames = new Map();
++function isSassEmbeddedSpawnBadFileDescriptor(error) {
++    if (!error)
++        return false;
++    const code = typeof error === 'object' && 'code' in error ? error.code : undefined;
++    const message = error instanceof Error ? error.message : `${error}`;
++    return code === 'EBADF' && /\[sass\]\s+spawn\s+EBADF/.test(message);
++}
++async function preprocessStylesheet(code, filename, resolvedConfig) {
++    try {
++        return await preprocessCSS(code, `${filename}?direct`, resolvedConfig);
++    }
++    catch (error) {
++        const extension = extname(filename).toLowerCase();
++        if ((extension !== '.scss' && extension !== '.sass') ||
++            !isSassEmbeddedSpawnBadFileDescriptor(error)) {
++            throw error;
++        }
++        const absoluteFilename = isAbsolute(filename) ? filename : resolve(filename);
++        const sass = await import('sass');
++        const compiled = await sass.compileStringAsync(code, {
++            loadPaths: [dirname(absoluteFilename)],
++            sourceMap: false,
++            syntax: extension === '.sass' ? 'indented' : 'scss',
++            url: pathToFileURL(absoluteFilename),
++        });
++        const cssFilename = filename.replace(/\.(scss|sass)$/i, '.css');
++        return preprocessCSS(compiled.css, `${cssFilename}?direct`, resolvedConfig);
++    }
++}
+ export function angular(options) {
+     /**
+      * Normalize plugin options so defaults
+@@ -56,6 +86,7 @@ export function angular(options) {
+         include: options?.include ?? [],
+         additionalContentDirs: options?.additionalContentDirs ?? [],
+         liveReload: options?.liveReload ?? false,
++        externalRuntimeStyles: options?.externalRuntimeStyles ?? true,
+         disableTypeChecking: options?.disableTypeChecking ?? true,
+         fileReplacements: options?.fileReplacements ?? [],
+         useAngularCompilationAPI: options?.experimental?.useAngularCompilationAPI ?? false,
+@@ -179,7 +210,7 @@ export function angular(options) {
+                     inlineComponentStyles = new Map();
+                 }
+                 if (!jit) {
+-                    styleTransform = (code, filename) => preprocessCSS(code, filename, config);
++                    styleTransform = (code, filename) => preprocessStylesheet(code, filename.replace(/\?direct$/, ''), config);
+                 }
+                 if (isTest) {
+                     // set test watch mode
+@@ -248,7 +279,7 @@ export function angular(options) {
+                     if (pluginOptions.liveReload &&
+                         result?.hmrEligible &&
+                         classNames.get(fileId)) {
+-                        const relativeFileId = `${normalizePath(relative(process.cwd(), fileId))}@${classNames.get(fileId)}`;
++                        const relativeFileId = `${normalizePath(relative(pluginOptions.workspaceRoot, fileId))}@${classNames.get(fileId)}`;
+                         sendHMRComponentUpdate(ctx.server, relativeFileId);
+                         return ctx.modules.map((mod) => {
+                             if (mod.id === ctx.file) {
+@@ -324,7 +355,7 @@ export function angular(options) {
+                         await pendingCompilation;
+                         pendingCompilation = null;
+                         updates.forEach((updateId) => {
+-                            const impRelativeFileId = `${normalizePath(relative(process.cwd(), updateId))}@${classNames.get(updateId)}`;
++                            const impRelativeFileId = `${normalizePath(relative(pluginOptions.workspaceRoot, updateId))}@${classNames.get(updateId)}`;
+                             sendHMRComponentUpdate(ctx.server, impRelativeFileId);
+                         });
+                         return ctx.modules.map((mod) => {
+@@ -336,8 +367,8 @@ export function angular(options) {
+                     }
+                     return mods;
+                 }
+-                // clear HMR updates with a full reload
+-                classNames.clear();
++                // Unrecognized watched files must not erase component registrations;
++                // later template/style updates still depend on this map for HMR.
+                 return ctx.modules;
+             },
+             resolveId(id, importer) {
+@@ -587,7 +618,7 @@ export function angular(options) {
+         compilationPlugin,
+         !pluginOptions.fastCompile &&
+             pluginOptions.liveReload &&
+-            liveReloadPlugin({ classNames, fileEmitter }),
++            liveReloadPlugin({ classNames, fileEmitter, workspaceRoot: pluginOptions.workspaceRoot }),
+         ...(isTest && !isStackBlitz
+             ? angularVitestPlugins((id) => outputFiles.get(normalizePath(id))?.map)
+             : []),
+@@ -657,7 +688,7 @@ export function angular(options) {
+             fileReplacements: toAngularCompilationFileReplacements(pluginOptions.fileReplacements, pluginOptions.workspaceRoot),
+             modifiedFiles,
+             async transformStylesheet(data, containingFile, resourceFile, order, className) {
+-                if (pluginOptions.liveReload) {
++                if (pluginOptions.liveReload && pluginOptions.externalRuntimeStyles) {
+                     const id = createHash('sha256')
+                         .update(containingFile)
+                         .update(className)
+@@ -672,7 +703,7 @@ export function angular(options) {
+                     containingFile.replace('.ts', `.${options?.inlineStylesExtension}`);
+                 let stylesheetResult;
+                 try {
+-                    stylesheetResult = await preprocessCSS(data, `${filename}?direct`, resolvedConfig);
++                    stylesheetResult = await preprocessStylesheet(data, filename, resolvedConfig);
+                 }
+                 catch (e) {
+                     console.error(`${e}`);
+@@ -685,7 +716,7 @@ export function angular(options) {
+         }, (tsCompilerOptions) => {
+             if (pluginOptions.liveReload && watchMode) {
+                 tsCompilerOptions['_enableHmr'] = true;
+-                tsCompilerOptions['externalRuntimeStyles'] = true;
++                tsCompilerOptions['externalRuntimeStyles'] = pluginOptions.externalRuntimeStyles;
+                 // Workaround for https://github.com/angular/angular/issues/59310
+                 // Force extra instructions to be generated for HMR w/defer
+                 tsCompilerOptions['supportTestBed'] = true;
+@@ -846,7 +877,7 @@ export function angular(options) {
+         let rootNames = [...cached.rootNames];
+         if (pluginOptions.liveReload && watchMode) {
+             tsCompilerOptions['_enableHmr'] = true;
+-            tsCompilerOptions['externalRuntimeStyles'] = true;
++            tsCompilerOptions['externalRuntimeStyles'] = pluginOptions.externalRuntimeStyles;
+             // Workaround for https://github.com/angular/angular/issues/59310
+             // Force extra instructions to be generated for HMR w/defer
+             tsCompilerOptions['supportTestBed'] = true;
+diff --git a/node_modules/@analogjs/vite-plugin-angular/src/lib/live-reload-plugin.js b/node_modules/@analogjs/vite-plugin-angular/src/lib/live-reload-plugin.js
+index 8678b77..64e651f 100644
+--- a/node_modules/@analogjs/vite-plugin-angular/src/lib/live-reload-plugin.js
++++ b/node_modules/@analogjs/vite-plugin-angular/src/lib/live-reload-plugin.js
+@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
+ import { normalizePath } from 'vite';
+ const ANGULAR_COMPONENT_PREFIX = '/@ng/component';
+ const FILE_PREFIX = 'file:';
+-export function liveReloadPlugin({ classNames, fileEmitter, }) {
++export function liveReloadPlugin({ classNames, fileEmitter, workspaceRoot, }) {
+     return {
+         name: 'analogjs-live-reload-plugin',
+         apply: 'serve',
+@@ -23,7 +23,7 @@ export function liveReloadPlugin({ classNames, fileEmitter, }) {
+                     return;
+                 }
+                 const [fileId] = decodeURIComponent(componentId).split('@');
+-                const resolvedId = normalizePath(resolve(process.cwd(), fileId));
++                const resolvedId = normalizePath(resolve(workspaceRoot || process.cwd(), fileId));
+                 const invalidated = !!server.moduleGraph.getModuleById(resolvedId)
+                     ?.lastInvalidationTimestamp && classNames.get(resolvedId);
+                 // don't send an HMR update until the file has been invalidated
+@@ -55,7 +55,7 @@ export function liveReloadPlugin({ classNames, fileEmitter, }) {
+                 if (!componentId) {
+                     return;
+                 }
+-                const result = fileEmitter(normalizePath(resolve(process.cwd(), decodeURIComponent(componentId).split('@')[0])));
++                const result = fileEmitter(normalizePath(resolve(workspaceRoot || process.cwd(), decodeURIComponent(componentId).split('@')[0])));
+                 return result?.hmrUpdateCode || '';
+             }
+             return;

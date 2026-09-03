@@ -1,0 +1,353 @@
+{
+  "version": 1,
+  "skills": {
+    "ns-android-canvas-custom-view": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-android-canvas-custom-view/SKILL.md",
+      "computedHash": "f5712dcd604fb4c9f0651022d2c7a22ab899569bea3eec64932e15317d1492b5"
+    },
+    "ns-android-edge-to-edge": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/android/ns-android-edge-to-edge/SKILL.md",
+      "computedHash": "2fac63df656a2cc09314f431c06fe5da6a677ced274ab4177db3de1c087a936b"
+    },
+    "ns-android-java-interop-gotchas": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-android-java-interop-gotchas/SKILL.md",
+      "computedHash": "67b8286204a20e1cf8ca0a4c8fe4a113c0b849fe32a8a47eab04489af3378de5"
+    },
+    "ns-android-window-insets": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/android/ns-android-window-insets/SKILL.md",
+      "computedHash": "b8cdfca83676736011268b9acc32f93df4df9846355a355a507e298bbec88210"
+    },
+    "ns-angular-vite-migration": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-angular-vite-migration/SKILL.md",
+      "computedHash": "84f02f0f3fb52a1f422df66439d6b252ee41db94401121565eb21ce5d123cc9d"
+    },
+    "ns-angular-zoneless-native-choreography": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-angular-zoneless-native-choreography/SKILL.md",
+      "computedHash": "0dbbf254423325a8ca55947f4b1d0e68018e612c1227e92a537d99ed69754310"
+    },
+    "ns-animated-panel-height": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-animated-panel-height/SKILL.md",
+      "computedHash": "52a65d7e866c4c7423169e55172d1da1c39ae1820a61b2a03128cee8b9922b2f"
+    },
+    "ns-app-icons-and-launch-assets": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-app-icons-and-launch-assets/SKILL.md",
+      "computedHash": "dfa88e6e926bf4a828c08aeae46a85972339c3ebec4a111836986d8271075c70"
+    },
+    "ns-binding-expressions": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-binding-expressions/SKILL.md",
+      "computedHash": "eab48800be6b16cedf48c5d777e11c145823f474a64d61caa3b7da3679500ba6"
+    },
+    "ns-clgeocoder-place-and-timezone": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-clgeocoder-place-and-timezone/SKILL.md",
+      "computedHash": "a4947c56bbc73984ea301886e56808f008a7737b3de765ef5d634a81c978638a"
+    },
+    "ns-code-built-view-styling": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-code-built-view-styling/SKILL.md",
+      "computedHash": "d431c92848b41e31a7430c0a5cc7ef2036ec21f742fe00d3982ca69766af90bc"
+    },
+    "ns-color-formats": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-color-formats/SKILL.md",
+      "computedHash": "ccae6c15eac9852dcef9b180d7172076419ce0cfff2a29d4d88cd1f18b707647"
+    },
+    "ns-corelocation-direct": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-corelocation-direct/SKILL.md",
+      "computedHash": "1a2723f72b0940779c420cf208cc00b19cacc31424bb5569b9bb012bbe526017"
+    },
+    "ns-css-keyframes": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-css-keyframes/SKILL.md",
+      "computedHash": "511e781868f5c63d747f2d67880119742baf74cb9e1bfe2fe8754acf400cb1e6"
+    },
+    "ns-css-selectors": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-css-selectors/SKILL.md",
+      "computedHash": "89e37c690da2dd113ffd1141d8f22d9942cb21152fde2c3462c72eb279ff93a9"
+    },
+    "ns-css-variables-calc": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-css-variables-calc/SKILL.md",
+      "computedHash": "e976fe5ea655f25323c1bb4921d36ba3be26e429976e220f578a529f4c3f081e"
+    },
+    "ns-custom-view-platform-split": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-custom-view-platform-split/SKILL.md",
+      "computedHash": "a0e6f62a3b87cf83b77a8494984bc885d1a23a1c06382f1431a305421f7960ea"
+    },
+    "ns-file-qualifiers": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/tooling/ns-file-qualifiers/SKILL.md",
+      "computedHash": "0ce302f244c28c58e1320536e575eb0f2c5a63e785c4e1ae590a77c3a2b7bed6"
+    },
+    "ns-formatted-string-spans": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-formatted-string-spans/SKILL.md",
+      "computedHash": "8aa338f46d5c8257d9bf4fde25df0e297a5fc11cea3f22952979389d3c9d09bc"
+    },
+    "ns-gridlayout-spec-strings": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-gridlayout-spec-strings/SKILL.md",
+      "computedHash": "fe1dc5e9658ce5c1378d777e2234c70497f0b774425a0f06c7e778e144dc5880"
+    },
+    "ns-haptics-direct": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-haptics-direct/SKILL.md",
+      "computedHash": "731b2ff3a20efb637370830515e91bbad4785943c6804f2abf0a46d2b2be52d7"
+    },
+    "ns-http-gotchas": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-http-gotchas/SKILL.md",
+      "computedHash": "70b613d1bf0ccfe9138caefa58f4e74a50e90499b9010e6262240004a9645116"
+    },
+    "ns-input-accessory-dialogs": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-input-accessory-dialogs/SKILL.md",
+      "computedHash": "8bdc7c774d26bd69bb23e80f786aefc41f340a6e97818446099d1f9ffb511a84"
+    },
+    "ns-ios-bottom-sheet-native": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-ios-bottom-sheet-native/SKILL.md",
+      "computedHash": "d403efdd633c39aa876477014618380547844a5c957294965b8d8ce4be55f12c"
+    },
+    "ns-ios-cadisplaylink-render-loop": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-ios-cadisplaylink-render-loop/SKILL.md",
+      "computedHash": "3fc8d0416003534f003c5fd43231b9912c40245ef52035acc626e9d37b68393f"
+    },
+    "ns-ios-corespotlight": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ios/ns-ios-corespotlight/SKILL.md",
+      "computedHash": "1828ce143341bb4af78517144d89f2f21ea935e2ac0194c38d3ccf40257b0708"
+    },
+    "ns-ios-framework-typings": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-ios-framework-typings/SKILL.md",
+      "computedHash": "2d1fb4393a084f5d10bc7891e385a89d2668e994a98e74a72d41c2208051043a"
+    },
+    "ns-ios-safe-area-smudge": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ios/ns-ios-safe-area-smudge/SKILL.md",
+      "computedHash": "0cd4ea8a85c3e4105d8c6f79cc4fea492493234456004449ee8c3679a7bbd095"
+    },
+    "ns-ios-scenekit-from-typescript": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-ios-scenekit-from-typescript/SKILL.md",
+      "computedHash": "ed2d5a8552760a1cfbfc50256ce465636c177c703113dfeb85bc2359c5d2828f"
+    },
+    "ns-ios-scroll-under-bars": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ios/ns-ios-scroll-under-bars/SKILL.md",
+      "computedHash": "32e15d74ce494cd20423bf5411fdfc05771c9c2df52fb54ff6594b0cee57282c"
+    },
+    "ns-ios-simulator-automation": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-ios-simulator-automation/SKILL.md",
+      "computedHash": "c41b3cb07a879c5d104473ed7e940ab998df5cef6d5b3069893c8d82b547df0e"
+    },
+    "ns-ios-widgets": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ios/ns-ios-widgets/SKILL.md",
+      "computedHash": "16d1c3b55f58204c282343b3389f88625ed5cf020d4616a8e9abf1c1f4e35910"
+    },
+    "ns-iss-tracking-satellite-js": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-iss-tracking-satellite-js/SKILL.md",
+      "computedHash": "249f52f3008311f9061a5342d704a67aef327b5073b0711d84b00f7bab74b39e"
+    },
+    "ns-keyboard-input": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-keyboard-input/SKILL.md",
+      "computedHash": "a8d79be4cb1a3e04e87b3f7c15bed95241d74951338c7b5fd70b61c7c47f25f7"
+    },
+    "ns-line-height": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-line-height/SKILL.md",
+      "computedHash": "7c71f3bdc18310a5c187a26b422016febebdf0d7d752ef9ca0dde68212adf455"
+    },
+    "ns-liquid-glass-panel": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-liquid-glass-panel/SKILL.md",
+      "computedHash": "69e794b9edb2e60e5824a048a7723445732e2cdc9c8805fdaa1e8cc1c87973b3"
+    },
+    "ns-listview-recycling": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-listview-recycling/SKILL.md",
+      "computedHash": "6a4b2fdbb7f3d7c70278e83f45a05ea8f51da5abb5e9c1077cf6e183b71b2a69"
+    },
+    "ns-multi-window": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-multi-window/SKILL.md",
+      "computedHash": "de73461af40b6a3ade224828ca3e140bdf019d113b422aa12f8dcd096538fc51"
+    },
+    "ns-navigation-transitions": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-navigation-transitions/SKILL.md",
+      "computedHash": "d8efdb7fdfa95598c3ef901840e9dcd8508c864c35a8fb0f93e8ed48fd44880a"
+    },
+    "ns-no-intl-native-formatting": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-no-intl-native-formatting/SKILL.md",
+      "computedHash": "9c9ec5d40b3155f0de55ada6e46f78be260062af548f47a1c89c341c358fee02"
+    },
+    "ns-norrix-ota": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-norrix-ota/SKILL.md",
+      "computedHash": "f47537624a7adff2d1153eb77a47c3f7ceabeeff71a16c685d5bc374b88f523e"
+    },
+    "ns-observable-array-change-events": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-observable-array-change-events/SKILL.md",
+      "computedHash": "3c95ce507a1ad6c84142d7f364344d4f689435de8562015d52cad4337215374f"
+    },
+    "ns-observable-set-semantics": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-observable-set-semantics/SKILL.md",
+      "computedHash": "b961daf6d92662d48a923268fe2d4ceaf760da17815365c2372d2d585d5dc8fa"
+    },
+    "ns-page-navigation-lifecycle": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-page-navigation-lifecycle/SKILL.md",
+      "computedHash": "a203116a42de8b5487feb622c4ac927af82b138cf67496ead4410c03ef383638"
+    },
+    "ns-root-css-classes": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-root-css-classes/SKILL.md",
+      "computedHash": "dce7df8680293527e8688d61509c9780d3cccc1abc492aafb97aac524833c24f"
+    },
+    "ns-root-layout-overlays": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-root-layout-overlays/SKILL.md",
+      "computedHash": "bd0a86246f6dfe82be2342dd0e5e4de2a7f2c87e597b941526abac1e1c0c35e9"
+    },
+    "ns-snippets": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/tooling/ns-snippets/SKILL.md",
+      "computedHash": "87d715687099c8ae685bb0d558597fdb841029eab0fcf923455b1ddca9856281"
+    },
+    "ns-solar-terminator-math": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-solar-terminator-math/SKILL.md",
+      "computedHash": "39a21fb35ef39dc89c29bda6e6dc39ccb6501cb9a4c458d20a93bcd33e68ccea"
+    },
+    "ns-tabview-lazy-loading": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-tabview-lazy-loading/SKILL.md",
+      "computedHash": "68286926f9188525cdd0d1cf1e6a7d8328df68e2d1e6017ccbf773fcbaa5056d"
+    },
+    "ns-top-nav": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-top-nav/SKILL.md",
+      "computedHash": "90447837e0a505de99a57ae78579ab0bdf280d14ddbd4e158b5facbb9e164ad0"
+    },
+    "ns-touch-animations": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-touch-animations/SKILL.md",
+      "computedHash": "4add29bfcf22c0dd02ef9e47ba246377e34d92ce4b8493960982895088164236"
+    },
+    "ns-trace-debugging": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/testing/ns-trace-debugging/SKILL.md",
+      "computedHash": "2343df6af757dc33dd2c589881474b8ae0f60a669a347f2eaf8a1391125b5611"
+    },
+    "ns-uncaught-error-policy": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/tooling/ns-uncaught-error-policy/SKILL.md",
+      "computedHash": "fd6d04143ca8ee3d2263789317f9c4f4c8344c2b47aec7a5ee5bb934533513a2"
+    },
+    "ns-unit-testing": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/testing/ns-unit-testing/SKILL.md",
+      "computedHash": "193340b6f8f2627af1208e845edadd1c0bf7dc893a0b88d0378b0b07062da05b"
+    },
+    "ns-view-animations": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui/ns-view-animations/SKILL.md",
+      "computedHash": "8ca08a989a7f5fb5691f3b25a76fa177319677be4b5c75bc37c1c1768d0bf459"
+    },
+    "ns-web-globals": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-web-globals/SKILL.md",
+      "computedHash": "ba0a6ef6cc1d7ab51215dcec812e55139aca1d368e20923ff46502628db073b2"
+    },
+    "ns-webpack-angular-project-notes": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-webpack-angular-project-notes/SKILL.md",
+      "computedHash": "256856b07c33066f1499a0f36c5b8f92f8a5ee3a0ca03020fba9b008c442d54b"
+    },
+    "ns-xml-custom-components": {
+      "source": "NativeScript/skills",
+      "sourceType": "github",
+      "skillPath": "skills/core/ns-xml-custom-components/SKILL.md",
+      "computedHash": "b8ef122e9e107729eb8bad2db371f3c1f2137fb905545a359f153089a19ebd86"
+    }
+  }
+}
