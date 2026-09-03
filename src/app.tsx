@@ -1,86 +1,102 @@
-import { Application, isIOS } from "@nativescript/core";
-import type { SwiftUI } from "@nativescript/swift-ui";
-import { useEffect, useRef, useState } from "octane";
-import type { Embers } from "./elements/embers";
-import { subscribeFlame } from "./flame/flame";
-import { tagline } from "./theme";
+import { Color, Screen, type GridLayout } from "@nativescript/core";
+import type {
+  AnimationFunctionType,
+  Drawer as UiDrawer,
+  TranslationFunctionType,
+} from "@nativescript-community/ui-drawer";
+import { useRef } from "octane";
+import { ChatScreen } from "./components/chat-screen";
+import { DrawerPanel } from "./components/drawer";
+import { openSettings } from "./components/settings";
+import { dismissKeyboard, setComposerPushed, translateComposer } from "./state/accessory";
+import { drawerHaptic, tapHaptic } from "./ui/haptics";
 
-export interface AppProps {
-  /** `application`, `embedded`, `carplay` or `externalDisplay`. */
-  windowRole: string;
-  windowIndex: number;
-}
+// ChatGPT leaves the pushed-aside content undimmed — the seam reads as a
+// shadow, not a scrim. Near-zero alpha keeps the backdrop tappable (the
+// drawer hides it entirely at opacity 0).
+const BACKDROP = new Color("rgba(0, 0, 0, 0.02)");
+const OPEN_CORNER_RADIUS = 40;
 
-export function App({ windowRole, windowIndex }: AppProps) {
-  const [burst, setBurst] = useState(0);
-  const logo = useRef<SwiftUI | null>(null);
-  const embers = useRef<Embers | null>(null);
-  // Per-frame values never enter component state: the worker's intensity and
-  // the tap boost are pushed straight to the native views through refs, so a
-  // 30fps flame costs no re-renders and no host-command diffs.
-  const flame = useRef({ intensity: 1, boost: 0, burst: 0 });
+export function App() {
+  const drawerRef = useRef<UiDrawer | null>(null);
+  const mainRef = useRef<GridLayout | null>(null);
+  const drawerWidth = Math.min(320, Math.round(Screen.mainScreen.widthDIPs * 0.75));
 
-  const push = () => {
-    const { intensity, boost, burst } = flame.current;
-    if (logo.current) logo.current.data = { intensity: intensity + boost, burst };
-    if (embers.current) embers.current.heat = intensity;
+  // ChatGPT choreography: main content pushes right by the full reveal, the
+  // panel rides in with a slight parallax, the backdrop dims what remains of
+  // the main content, and the docked composer rides along with the content
+  // (it lives in the keyboard's window, so nothing else would move it). Runs
+  // per-frame during pans, so it must stay allocation-light. The values are
+  // `Object.assign`ed onto the views, so the keys are view properties
+  // (`translateX`), despite the declared TrData type.
+  const translation: TranslationFunctionType = (side, width, _value, delta, progress, drawer) => {
+    const push = side === "left" ? delta : -delta;
+    // A programmatic open/close evaluates this once, for the target, and then
+    // animates; the composer follows that animation in `animate` instead.
+    if ((drawer as unknown as { mIsPanning?: boolean }).mIsPanning) translateComposer(push);
+    return {
+      mainContent: { translateX: push },
+      leftDrawer: { translateX: -(width - delta) * 0.4 },
+      backDrop: { translateX: push, opacity: progress },
+    } as unknown as ReturnType<TranslationFunctionType>;
   };
 
-  useEffect(
-    () =>
-      subscribeFlame((intensity) => {
-        flame.current.intensity = intensity;
-        push();
-      }),
-    [],
-  );
+  // Invoked ahead of the drawer's own open/close animation with its duration;
+  // resolving at once keeps the composer's animation concurrent with it. By
+  // now the drawer has rewritten the translation data into animation form
+  // (`translate: { x }`), which is where the target lives.
+  const animate: AnimationFunctionType = (_side, duration, trData) => {
+    const main = (trData as unknown as { mainContent?: { translate?: { x?: number } } }).mainContent;
+    translateComposer(main?.translate?.x ?? 0, duration);
+    return Promise.resolve();
+  };
+
+  const closeDrawer = () => {
+    drawerRef.current?.close();
+  };
+
+  // Shared by the hamburger and pan-driven opens (only the latter raise `start`).
+  const beginOpen = () => {
+    dismissKeyboard();
+    setComposerPushed(OPEN_CORNER_RADIUS);
+    if (mainRef.current) mainRef.current.borderRadius = OPEN_CORNER_RADIUS;
+  };
+
+  const openDrawer = () => {
+    beginOpen();
+    drawerRef.current?.open("left");
+  };
 
   return (
-    <gridlayout rows="*,auto,auto,auto,*">
-      <embers ref={embers} row={0} height={230} verticalAlignment="bottom" />
-      {isIOS ? (
-        <swiftui
-          ref={logo}
-          row={0}
-          swiftId="octaneLogo"
-          height={190}
-          verticalAlignment="bottom"
-          onSwiftUIEvent={() => {
-            flame.current.boost = 1.6;
-            push();
-            setTimeout(() => {
-              flame.current.boost = 0;
-              push();
-            }, 900);
+    <drawer
+      ref={drawerRef}
+      leftDrawerMode="under"
+      gestureEnabled={true}
+      backdropColor={BACKDROP}
+      translationFunction={translation}
+      animationFunction={animate}
+      onStart={beginOpen}
+      onOpen={() => drawerHaptic()}
+      onClose={() => {
+        drawerHaptic();
+        setComposerPushed(0);
+        translateComposer(0);
+        if (mainRef.current) mainRef.current.borderRadius = 0;
+      }}
+    >
+      <gridlayout hostSlot="mainContent" ref={mainRef} class="screen main-panel">
+        <ChatScreen onMenu={openDrawer} />
+      </gridlayout>
+      <gridlayout hostSlot="leftDrawer" width={drawerWidth} class="drawer">
+        <DrawerPanel
+          onClose={closeDrawer}
+          onSettings={() => {
+            tapHaptic();
+            const host = mainRef.current;
+            if (host) openSettings(host);
           }}
         />
-      ) : null}
-      <label row={1} class="text-xl text-center text-octane">
-        Hot, right now
-      </label>
-      <label row={2} class="text-2xl text-center text-octane">
-        {tagline}
-      </label>
-      <button
-        row={3}
-        class="mt-10 font-bold"
-        onTap={() => {
-          const next = burst + 1;
-          setBurst(next);
-          flame.current.burst = next;
-          push();
-        }}
-      >
-        Tap to ignite 🔥 {burst}
-      </button>
-      <label
-        row={4}
-        class="text-center text-octane"
-        verticalAlignment="bottom"
-        onTap={() => Application.openWindow()}
-      >
-        {`window ${windowIndex} · ${windowRole}`}
-      </label>
-    </gridlayout>
+      </gridlayout>
+    </drawer>
   );
 }

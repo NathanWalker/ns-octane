@@ -241,6 +241,12 @@
       "skillPath": "skills/ns-no-intl-native-formatting/SKILL.md",
       "computedHash": "9c9ec5d40b3155f0de55ada6e46f78be260062af548f47a1c89c341c358fee02"
     },
+    "ns-norrix-ota": {
+      "source": "nstudio/nativescript-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ns-norrix-ota/SKILL.md",
+      "computedHash": "f47537624a7adff2d1153eb77a47c3f7ceabeeff71a16c685d5bc374b88f523e"
+    },
     "ns-observable-array-change-events": {
       "source": "NativeScript/skills",
       "sourceType": "github",

@@ -1,18 +1,34 @@
-import { Application, isIOS, Page, type NativeWindow } from "@nativescript/core";
-import { registerSwiftUI, UIDataDriver } from "@nativescript/swift-ui";
-import { renderNativeScriptApp } from "./octane/driver";
+import {
+  Application,
+  CoreTypes,
+  Page,
+  TouchManager,
+  isAndroid,
+  type NativeWindow,
+} from "@nativescript/core";
+import { install as installGestureHandler } from "@nativescript-community/gesturehandler";
+import { renderNativeScriptApp } from "@nativescript-community/octane";
+import "./elements";
 import { App } from "./app";
 
-// Provided by App_Resources/iOS/src/OctaneLogo.swift. Run `ns typings ios` to
-// generate real types for it; the declaration is enough to reference the class.
-declare const OctaneLogoProvider: any;
+// ui-drawer's pan tracking rides on the community gesture handler.
+installGestureHandler();
 
-if (isIOS) {
-  registerSwiftUI(
-    "octaneLogo",
-    (view) => new UIDataDriver(OctaneLogoProvider.alloc().init(), view),
-  );
-}
+// Every tappable view depresses slightly on touch; views opt out with
+// `ignoreTouchAnimation` (the chat scroll surface does).
+TouchManager.enableGlobalTapAnimations = true;
+TouchManager.animations = {
+  down: {
+    scale: { x: 0.95, y: 0.95 },
+    duration: 130,
+    curve: CoreTypes.AnimationCurve.easeOut,
+  },
+  up: {
+    scale: { x: 1, y: 1 },
+    duration: 220,
+    curve: CoreTypes.AnimationCurve.easeOut,
+  },
+};
 
 /**
  * One Octane root per window. Every window — the phone screen, a second iPad
@@ -25,14 +41,11 @@ const roots = new Map<NativeWindow | undefined, ReturnType<typeof renderNativeSc
 function createWindowContent(window: NativeWindow | undefined): Page {
   const page = new Page();
   page.actionBarHidden = true;
-  const windows = Application.getWindows();
-  roots.set(
-    window,
-    renderNativeScriptApp(page, App, {
-      windowRole: window?.role ?? "application",
-      windowIndex: Math.max(1, windows.indexOf(window as NativeWindow) + 1),
-    }),
-  );
+  // Core pads the root view by the system bars. Skipping both edges lets the
+  // canvas run under the status bar and the gesture strip; each screen pads
+  // its own chrome from `safeAreaInsets()` instead.
+  if (isAndroid) page.androidOverflowEdge = "top,bottom";
+  roots.set(window, renderNativeScriptApp(page, App));
   return page;
 }
 

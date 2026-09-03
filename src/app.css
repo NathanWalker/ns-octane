@@ -9,9 +9,7 @@
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
-Page {
-  background-color: rgba(255, 65, 90, 0.14);
-}
+/* ---------------------------------------------------------------- fonts */
 
 .fab {
   font-family: 'Font Awesome 5 Brands', 'fa-brands-400';
@@ -28,6 +26,691 @@ Page {
   font-weight: 400;
 }
 
-.text-octane {
-  color: #d81f38;
+/* ---------------------------------------------------------------- base */
+
+Page {
+  background-color: #ffffff;
+}
+
+.ns-dark Page {
+  background-color: #212121;
+}
+
+/* Strip native button chrome so buttons are exactly what the CSS says. */
+Button {
+  border-width: 0;
+  border-radius: 0;
+  background-color: transparent;
+  text-transform: none;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  android-elevation: 0;
+  android-dynamic-elevation-offset: 0;
+}
+
+TextView,
+TextField {
+  background-color: transparent;
+  border-width: 0;
+  placeholder-color: #9a9a9a;
+}
+
+.screen {
+  background-color: #ffffff;
+}
+
+.ns-dark .screen {
+  background-color: #212121;
+}
+
+/* Seam shadow the main content casts onto the open drawer; outside the
+   container (and so invisible) while the content fills the screen. */
+.main-panel {
+  box-shadow: 0 0 30 rgba(0, 0, 0, 0.18);
+}
+
+/* The canvas is not flat white: it eases into a soft gray toward the
+   composer, so the white chrome (circles, pills) reads against it. */
+.screen-canvas {
+  background: linear-gradient(to bottom, #ffffff 68%, #f4f4f5 100%);
+}
+
+.ns-dark .screen-canvas {
+  background: linear-gradient(to bottom, #212121 68%, #1c1c1d 100%);
+}
+
+/* Streamed tokens wash out into the canvas near the composer while arriving.
+   The gradient value must stay on one line — the CSS parser drops it otherwise. */
+.stream-fade {
+  height: 130;
+  background: linear-gradient(to bottom, rgba(248, 248, 249, 0) 0%, rgba(245, 245, 246, 0.9) 60%, rgba(244, 244, 245, 1) 100%);
+}
+
+.ns-dark .stream-fade {
+  background: linear-gradient(to bottom, rgba(33, 33, 33, 0) 0%, rgba(32, 32, 33, 0.9) 60%, rgba(28, 28, 29, 1) 100%);
+}
+
+.text-primary {
+  color: #0d0d0d;
+}
+
+.text-secondary {
+  color: #8e8e93;
+}
+
+.ns-dark .text-primary {
+  color: #ececec;
+}
+
+.ns-dark .text-secondary {
+  color: #9b9b9b;
+}
+
+/* ---------------------------------------------------------------- top bar */
+
+/* Content scrolls under the status bar and shows through it faintly; the wash
+   holds through the band the bar's buttons float in (so their shadows land on
+   a light ground) and clears just below them. Percentages are of the expanded
+   layer: the status bar ends at 52%, the buttons at 95%. Gradient values must
+   stay on one line. */
+.top-bar-fade {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.8) 52%, rgba(255, 255, 255, 0.7) 84%, rgba(255, 255, 255, 0) 100%);
+}
+
+.ns-dark .top-bar-fade {
+  background: linear-gradient(to bottom, rgba(33, 33, 33, 0.82) 0%, rgba(33, 33, 33, 0.8) 52%, rgba(33, 33, 33, 0.7) 84%, rgba(33, 33, 33, 0) 100%);
+}
+
+.icon-circle {
+  width: 44;
+  height: 44;
+  border-radius: 22;
+  background-color: #ffffff;
+  box-shadow: 0 6 28 rgba(0, 0, 0, 0.1);
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  font-size: 16;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ns-dark .icon-circle {
+  background-color: #303030;
+  color: #ececec;
+  tint-color: #ececec;
+}
+
+.bar-pill {
+  border-radius: 22;
+  background-color: #ffffff;
+  box-shadow: 0 6 28 rgba(0, 0, 0, 0.1);
+}
+
+.ns-dark .bar-pill {
+  background-color: #303030;
+}
+
+.bar-pill-btn {
+  width: 48;
+  height: 44;
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  font-size: 16;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ns-dark .bar-pill-btn {
+  color: #ececec;
+  tint-color: #ececec;
+}
+
+.upgrade-pill {
+  border-radius: 22;
+  background-color: #ffffff;
+  box-shadow: 0 6 28 rgba(0, 0, 0, 0.1);
+  padding: 0 18;
+  height: 44;
+}
+
+.ns-dark .upgrade-pill {
+  background-color: #303030;
+}
+
+.upgrade-text {
+  color: #0285ff;
+  tint-color: #0285ff;
+  font-size: 17;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* ---------------------------------------------------------------- empty state */
+
+.suggest-icon {
+  width: 40;
+  height: 40;
+  border-radius: 20;
+  background-color: #ffffff;
+  box-shadow: 0 6 24 rgba(0, 0, 0, 0.09);
+  color: #3d3d3d;
+  tint-color: #3d3d3d;
+  font-size: 15;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ns-dark .suggest-icon {
+  background-color: #303030;
+  color: #cdcdcd;
+  tint-color: #cdcdcd;
+}
+
+.suggest-text {
+  color: #5d5d5d;
+  font-size: 17;
+  vertical-align: middle;
+  margin-left: 14;
+}
+
+.ns-dark .suggest-text {
+  color: #b4b4b4;
+}
+
+/* ---------------------------------------------------------------- chat thread */
+
+.bubble-user {
+  background-color: #d7ebff;
+  color: #0d0d0d;
+  border-radius: 22;
+  padding: 11 16;
+  font-size: 17;
+  line-height: 4;
+  horizontal-alignment: right;
+  margin: 18 0 0 56;
+}
+
+.ns-dark .bubble-user {
+  background-color: #2f4a63;
+  color: #ececec;
+}
+
+.scroll-down-fab {
+  width: 36;
+  height: 36;
+  border-radius: 18;
+  background-color: #ffffff;
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  font-size: 14;
+  text-align: center;
+  vertical-align: middle;
+  border-width: 1;
+  border-color: #ececec;
+}
+
+.ns-dark .scroll-down-fab {
+  background-color: #303030;
+  color: #ececec;
+  tint-color: #ececec;
+  border-color: #3d3d3d;
+}
+
+/* ---------------------------------------------------------------- markdown */
+
+.md-p,
+.md-li,
+.md-quote {
+  font-size: 17;
+  color: #0d0d0d;
+  line-height: 6;
+}
+
+.ns-dark .md-p,
+.ns-dark .md-li,
+.ns-dark .md-quote {
+  color: #ececec;
+}
+
+.md-p {
+  margin-top: 14;
+}
+
+.md-h2 {
+  font-size: 21;
+  font-weight: 700;
+  color: #0d0d0d;
+  margin-top: 24;
+}
+
+.md-h3 {
+  font-size: 17;
+  font-weight: 700;
+  color: #0d0d0d;
+  margin-top: 18;
+}
+
+.ns-dark .md-h2,
+.ns-dark .md-h3 {
+  color: #ececec;
+}
+
+.md-list {
+  margin-top: 6;
+}
+
+.md-li-row {
+  margin-top: 8;
+  margin-left: 6;
+}
+
+.md-done {
+  color: #9b9b9b;
+}
+
+.md-bullet {
+  font-size: 17;
+  color: #0d0d0d;
+  vertical-align: top;
+}
+
+.ns-dark .md-bullet {
+  color: #ececec;
+}
+
+.md-quote-row {
+  margin-top: 14;
+  margin-left: 2;
+}
+
+.md-quote-bar {
+  background-color: #d9d9d9;
+  border-radius: 2;
+}
+
+.ns-dark .md-quote-bar {
+  background-color: #4a4a4a;
+}
+
+.md-quote {
+  margin-left: 14;
+}
+
+/* ChatGPT-style dark code card in both themes */
+.code-card {
+  background-color: #0d0d0d;
+  border-radius: 14;
+  margin-top: 14;
+}
+
+.code-head {
+  padding: 10 14 6 14;
+}
+
+.code-lang {
+  font-size: 12;
+  color: #9b9b9b;
+}
+
+.code-copy {
+  font-size: 12;
+  color: #b4b4b4;
+}
+
+.code-body {
+  margin: 0 14 12 14;
+}
+
+.md-caret {
+  font-size: 15;
+  color: #0d0d0d;
+  margin-top: 8;
+}
+
+.ns-dark .md-caret {
+  color: #ececec;
+}
+
+.md-hr {
+  height: 1;
+  background-color: #ececec;
+  margin: 18 0;
+}
+
+.ns-dark .md-hr {
+  background-color: #3a3a3c;
+}
+
+.md-img {
+  border-radius: 12;
+  margin-top: 14;
+}
+
+.md-table {
+  margin-top: 14;
+  border-width: 1;
+  border-color: #ececec;
+  border-radius: 12;
+}
+
+.ns-dark .md-table {
+  border-color: #3a3a3c;
+}
+
+.md-tr {
+  padding: 8 12;
+}
+
+.md-th {
+  background-color: #f6f6f6;
+}
+
+.ns-dark .md-th {
+  background-color: #2c2c2c;
+}
+
+.md-td {
+  font-size: 14;
+  color: #0d0d0d;
+  padding: 4 10;
+}
+
+.ns-dark .md-td {
+  color: #ececec;
+}
+
+/* ---------------------------------------------------------------- composer */
+
+.composer-row {
+  padding: 4 12 8 12;
+  background-color: transparent;
+}
+
+.composer-pill {
+  background-color: #ffffff;
+  border-radius: 26;
+  border-width: 1;
+  border-color: #efefef;
+  box-shadow: 0 8 30 rgba(0, 0, 0, 0.1);
+}
+
+.ns-dark .composer-pill {
+  background-color: #2f2f2f;
+  border-color: #3d3d3d;
+}
+
+.composer-input {
+  color: #0d0d0d;
+}
+
+.ns-dark .composer-input {
+  color: #ececec;
+}
+
+.composer-icon {
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  font-size: 17;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ns-dark .composer-icon {
+  color: #ececec;
+  tint-color: #ececec;
+}
+
+.composer-action {
+  width: 32;
+  height: 32;
+  border-radius: 16;
+  margin: 0 9 9 4;
+  vertical-align: bottom;
+  color: #ffffff;
+  tint-color: #ffffff;
+  font-size: 13;
+  text-align: center;
+}
+
+.composer-action-voice {
+  background-color: #0285ff;
+}
+
+.composer-action-stop {
+  font-size: 12;
+}
+
+.composer-action-send {
+  background-color: #0d0d0d;
+}
+
+.ns-dark .composer-action-send {
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  background-color: #ececec;
+}
+
+/* ---------------------------------------------------------------- drawer */
+
+.drawer {
+  background-color: #f9f9f9;
+}
+
+.ns-dark .drawer {
+  background-color: #171717;
+}
+
+.drawer-title {
+  font-size: 24;
+  font-weight: 700;
+  color: #0d0d0d;
+}
+
+.ns-dark .drawer-title {
+  color: #ececec;
+}
+
+.drawer-icon-btn {
+  width: 40;
+  height: 40;
+  border-radius: 20;
+  background-color: #f1f1f1;
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  font-size: 15;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ns-dark .drawer-icon-btn {
+  background-color: #2c2c2c;
+  color: #ececec;
+  tint-color: #ececec;
+}
+
+.drawer-item-icon {
+  width: 30;
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  font-size: 17;
+  vertical-align: middle;
+}
+
+.ns-dark .drawer-item-icon {
+  color: #ececec;
+  tint-color: #ececec;
+}
+
+.drawer-item-text {
+  color: #0d0d0d;
+  font-size: 17;
+  vertical-align: middle;
+  margin-left: 12;
+}
+
+.ns-dark .drawer-item-text {
+  color: #ececec;
+}
+
+.drawer-section {
+  color: #8e8e93;
+  font-size: 14;
+  font-weight: 600;
+}
+
+.drawer-recent {
+  color: #0d0d0d;
+  font-size: 16;
+  padding: 12 0;
+}
+
+.ns-dark .drawer-recent {
+  color: #ececec;
+}
+
+.chat-fab {
+  border-radius: 26;
+  background-color: #0285ff;
+  height: 52;
+  padding: 0 22;
+}
+
+.chat-fab-text {
+  color: #ffffff;
+  tint-color: #ffffff;
+  font-size: 17;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* ---------------------------------------------------------------- overlays */
+
+.overlay-dim {
+  background-color: #000000;
+}
+
+.menu-card {
+  background-color: #fbfbfb;
+  border-radius: 24;
+}
+
+.ns-dark .menu-card {
+  background-color: #2f2f2f;
+}
+
+.menu-item-icon {
+  width: 40;
+  height: 40;
+  border-radius: 20;
+  background-color: #efefef;
+  color: #0d0d0d;
+  font-size: 15;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ns-dark .menu-item-icon {
+  background-color: #3d3d3d;
+  color: #ececec;
+}
+
+.menu-item-text {
+  color: #0d0d0d;
+  font-size: 17;
+  vertical-align: middle;
+  margin-left: 16;
+}
+
+.ns-dark .menu-item-text {
+  color: #ececec;
+}
+
+.menu-item-destructive {
+  color: #e0243c;
+}
+
+/* ---------------------------------------------------------------- settings */
+
+.sheet {
+  background-color: #f2f2f6;
+}
+
+.ns-dark .sheet {
+  background-color: #1c1c1e;
+}
+
+.sheet-card {
+  background-color: #ffffff;
+  border-radius: 16;
+}
+
+.ns-dark .sheet-card {
+  background-color: #2c2c2e;
+}
+
+.sheet-section {
+  color: #8e8e93;
+  font-size: 14;
+  font-weight: 600;
+  margin: 22 20 8 20;
+}
+
+.sheet-row-icon {
+  width: 30;
+  color: #0d0d0d;
+  tint-color: #0d0d0d;
+  font-size: 16;
+  vertical-align: middle;
+}
+
+.ns-dark .sheet-row-icon {
+  color: #ececec;
+  tint-color: #ececec;
+}
+
+.sheet-row-text {
+  color: #0d0d0d;
+  font-size: 17;
+  vertical-align: middle;
+  margin-left: 8;
+}
+
+.ns-dark .sheet-row-text {
+  color: #ececec;
+}
+
+.sheet-row-detail {
+  color: #8e8e93;
+  tint-color: #8e8e93;
+  font-size: 16;
+  vertical-align: middle;
+}
+
+.sheet-divider {
+  height: 1;
+  background-color: #ededed;
+  margin-left: 58;
+}
+
+.ns-dark .sheet-divider {
+  background-color: #3a3a3c;
+}
+
+.tint-accent {
+  color: #0285ff;
+  tint-color: #0285ff;
+}
+
+.avatar {
+  width: 96;
+  height: 96;
+  border-radius: 48;
+  background-color: #8f9a70;
+  color: #ffffff;
+  font-size: 34;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
 }
