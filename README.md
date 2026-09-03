@@ -1,6 +1,8 @@
 A ChatGPT-style chat app for iOS and Android rendered by [Octane](https://octanejs.dev) on
 [NativeScript](https://nativescript.org).
 
+https://github.com/user-attachments/assets/6fcca43b-de37-48d3-91e1-6bfd00a97f77
+
 - **Chat thread** — user bubbles + assistant responses streamed word-by-word, rendered through
   an Octane flavor for [`@nstudio/nstreamdown`](https://github.com/nstudio/nstreamdown)
   (headings, lists, quotes, tables, inline code, and syntax-highlighted code cards via its
