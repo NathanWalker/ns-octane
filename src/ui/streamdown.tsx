@@ -16,7 +16,16 @@ type Key = { key?: string | number };
 // imported from an uncompiled module binds a second runtime copy whose
 // dispatcher is never active ("Cannot read properties of null (reading
 // 'hooks')").
-let appearance: "light" | "dark" = Application.systemAppearance() === "dark" ? "dark" : "light";
+// Read on first use, not at module load: in a bundled (non-HMR) build every
+// module evaluates before `Application.run()`, and on Android the appearance
+// query needs the application context that only `run` provides.
+let appearance: "light" | "dark" | null = null;
+const currentAppearance = (): "light" | "dark" => {
+  if (appearance === null) {
+    appearance = Application.systemAppearance() === "dark" ? "dark" : "light";
+  }
+  return appearance;
+};
 const appearanceListeners = new Set<() => void>();
 Application.on("systemAppearanceChanged", (args) => {
   const next =
@@ -34,7 +43,7 @@ const subscribeAppearance = (listener: () => void) => {
 
 /** Re-renders on system light/dark switches — for colors set as props, not CSS. */
 function useDarkMode(): boolean {
-  return useSyncExternalStore(subscribeAppearance, () => appearance) === "dark";
+  return useSyncExternalStore(subscribeAppearance, currentAppearance) === "dark";
 }
 
 export interface StreamdownConfig {
