@@ -6,7 +6,11 @@ export default {
   appResourcesPath: 'App_Resources',
   android: {
     v8Flags: '--expose_gc',
-    markingMode: 'none'
+    markingMode: 'none',
+    runtimePackageName: '@nativescript/android-hermes'
+  },
+  ios: {
+    runtimePackageName: '@nativescript/ios-hermes'
   },
   bundler: 'vite',
   bundlerConfigPath: 'vite.config.mts'
