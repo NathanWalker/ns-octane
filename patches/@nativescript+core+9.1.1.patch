@@ -1,0 +1,352 @@
+diff --git a/node_modules/@nativescript/core/application/application.android.js b/node_modules/@nativescript/core/application/application.android.js
+index 124944e..9007c0d 100644
+--- a/node_modules/@nativescript/core/application/application.android.js
++++ b/node_modules/@nativescript/core/application/application.android.js
+@@ -13,7 +13,7 @@ import { CommonA11YServiceEnabledObservable, SharedA11YObservable, notifyAccessi
+ import { androidGetForegroundActivity, androidGetStartActivity, androidSetForegroundActivity, androidSetStartActivity, applyContentDescription } from './helpers';
+ import { getImageFetcher, getNativeApp, getRootView, initImageCache, setA11yUpdatePropertiesCallback, setApplicationPropertiesCallback, setAppMainEntry, setNativeApp, setRootView, setToggleApplicationEventListenersCallback } from './helpers-common';
+ import { getNativeScriptGlobals } from '../globals/global-utils';
+-import { enableEdgeToEdge } from '../utils/native-helper-for-android';
++import { enableEdgeToEdge, refreshEdgeToEdge } from '../utils/native-helper-for-android';
+ import lazy from '../utils/lazy';
+ const WINDOW_ID_EXTRA = 'com.tns.activity.windowId';
+ let multiWindowWarned = false;
+@@ -418,6 +418,16 @@ export class AndroidApplication extends ApplicationCommon {
+         this.setSystemAppearance(primaryWindow?.systemAppearance() ?? this.getSystemAppearanceValue(configuration));
+         this.setLayoutDirection(primaryWindow?.layoutDirection() ?? this.getLayoutDirectionValue(configuration));
+     }
++    setSystemAppearance(value) {
++        super.setSystemAppearance(value);
++        // The activity survives the switch (uiMode is a handled config change),
++        // so the edge-to-edge system bar style must be applied again to pick up
++        // the icon appearance for the new theme.
++        if (this.edgeToEdgeAppearance !== value) {
++            this.edgeToEdgeAppearance = value;
++            refreshEdgeToEdge(this.foregroundActivity ?? this.startActivity);
++        }
++    }
+     getNativeApplication() {
+         let nativeApp = this.nativeApp;
+         if (nativeApp) {
+diff --git a/node_modules/@nativescript/core/platforms/android/core.aar b/node_modules/@nativescript/core/platforms/android/core.aar
+new file mode 100644
+index 0000000..09b3af4
+Binary files /dev/null and b/node_modules/@nativescript/core/platforms/android/core.aar differ
+diff --git a/node_modules/@nativescript/core/ui/core/view/index.ios.js b/node_modules/@nativescript/core/ui/core/view/index.ios.js
+index 9a2ed97..7d3ef2c 100644
+--- a/node_modules/@nativescript/core/ui/core/view/index.ios.js
++++ b/node_modules/@nativescript/core/ui/core/view/index.ios.js
+@@ -820,6 +820,16 @@ export class View extends ViewCommon {
+         const ownerController = this.viewController || IOSHelper.getParentWithViewController(this)?.viewController;
+         IOSHelper.invalidateStatusBarAppearance(ownerController, `View.updateStatusBarStyle:${value}`);
+     }
++    _childIndexToNativeChildIndex(index) {
++        if (typeof index !== 'number') {
++            return index;
++        }
++        const effectView = this._glassEffectView;
++        if (effectView && effectView.superview === this.nativeViewProtected) {
++            return index + 1;
++        }
++        return index;
++    }
+     [iosGlassEffectProperty.setNative](value) {
+         if (!this.nativeViewProtected || !supportsGlass()) {
+             return;
+@@ -1077,7 +1087,7 @@ export class CustomLayoutView extends ContainerView {
+                 parentNativeView.addSubview(childNativeView);
+             }
+             else {
+-                parentNativeView.insertSubviewAtIndex(childNativeView, atIndex);
++                parentNativeView.insertSubviewBelowSubview(childNativeView, parentNativeView.subviews.objectAtIndex(atIndex));
+             }
+             // Add outer shadow layer manually as it belongs to parent layer tree (this is needed for reusable views)
+             if (childNativeView.outerShadowContainerLayer && !childNativeView.outerShadowContainerLayer.superlayer) {
+diff --git a/node_modules/@nativescript/core/ui/layouts/layout-base-common.js b/node_modules/@nativescript/core/ui/layouts/layout-base-common.js
+index 8559f75..6e0d6ff 100644
+--- a/node_modules/@nativescript/core/ui/layouts/layout-base-common.js
++++ b/node_modules/@nativescript/core/ui/layouts/layout-base-common.js
+@@ -121,7 +121,8 @@ export class LayoutBaseCommon extends CustomLayoutView {
+         for (let i = 0; i < index && i < this._subViews.length; i++) {
+             result += this._subViews[i]._getNativeViewsCount();
+         }
+-        return result;
++        // The platform base accounts for native subviews that are not children.
++        return super._childIndexToNativeChildIndex(result);
+     }
+     eachChildView(callback) {
+         for (let i = 0, length = this._subViews.length; i < length; i++) {
+diff --git a/node_modules/@nativescript/core/ui/layouts/layout-base.android.js b/node_modules/@nativescript/core/ui/layouts/layout-base.android.js
+index 1bb44e3..cb920a0 100644
+--- a/node_modules/@nativescript/core/ui/layouts/layout-base.android.js
++++ b/node_modules/@nativescript/core/ui/layouts/layout-base.android.js
+@@ -7,17 +7,13 @@ export class LayoutBase extends LayoutBaseCommon {
+         return true;
+     }
+     [clipToBoundsProperty.setNative](value) {
+-        // TODO: Use ClipRectangle if API > 16!
+-        // We can't implement this without calling setClipChildren(false) on every ancestor up in the visual tree,
+-        // which will kill performance. It will also lead to unwanted side effects such as other totally unrelated
+-        // views being affected by setting the parents' setClipChildren to false.
+-        // The problem in Android is that a ViewGroup either clips ALL of its children or it does not. Unlike iOS, the clipping
+-        // cannot be controlled on a per view basis. So clipToBounds=false will have to be somehow achieved with stacking different
+-        // views on top of one another in an AbsoluteLayout or GridLayout. There is always a workaround when playing with layouts.
+-        //
+-        // The following article explains this in detail:
+-        // http://stackoverflow.com/questions/25044085/when-drawing-outside-the-view-clip-bounds-with-android-how-do-i-prevent-underli
+-        console.warn(`clipToBounds with value false is not supported on Android. You can use this.android.getParent().setClipChildren(false) as an alternative`);
++        // Android clips per parent, not per child: a ViewGroup either confines
++        // every child to its own bounds or none of them. A view that must draw
++        // outside itself (a box-shadow, a translated child) therefore needs its
++        // parent layout's clipToBounds set to false, not its own.
++        const nativeView = this.nativeViewProtected;
++        nativeView.setClipChildren(value);
++        nativeView.setClipToPadding(value);
+     }
+     [isPassThroughParentEnabledProperty.setNative](value) {
+         this.nativeViewProtected.setPassThroughParent(value);
+diff --git a/node_modules/@nativescript/core/ui/layouts/liquid-glass-container/index.ios.js b/node_modules/@nativescript/core/ui/layouts/liquid-glass-container/index.ios.js
+index f72d4a1..14d0b85 100644
+--- a/node_modules/@nativescript/core/ui/layouts/liquid-glass-container/index.ios.js
++++ b/node_modules/@nativescript/core/ui/layouts/liquid-glass-container/index.ios.js
+@@ -37,7 +37,7 @@ export class LiquidGlassContainer extends LiquidGlassContainerCommon {
+                 parentNativeView.addSubview(childNativeView);
+             }
+             else {
+-                parentNativeView.insertSubviewAtIndex(childNativeView, atIndex);
++                parentNativeView.insertSubviewBelowSubview(childNativeView, parentNativeView.subviews.objectAtIndex(atIndex));
+             }
+             // Add outer shadow layer manually as it belongs to parent layer tree (this is needed for reusable views)
+             if (childNativeView.outerShadowContainerLayer && !childNativeView.outerShadowContainerLayer.superlayer) {
+diff --git a/node_modules/@nativescript/core/ui/layouts/liquid-glass/index.ios.js b/node_modules/@nativescript/core/ui/layouts/liquid-glass/index.ios.js
+index 660a31e..423a8ba 100644
+--- a/node_modules/@nativescript/core/ui/layouts/liquid-glass/index.ios.js
++++ b/node_modules/@nativescript/core/ui/layouts/liquid-glass/index.ios.js
+@@ -30,7 +30,7 @@ export class LiquidGlass extends LiquidGlassCommon {
+                 parentNativeView.addSubview(childNativeView);
+             }
+             else {
+-                parentNativeView.insertSubviewAtIndex(childNativeView, atIndex);
++                parentNativeView.insertSubviewBelowSubview(childNativeView, parentNativeView.subviews.objectAtIndex(atIndex));
+             }
+             // If the child has an outer shadow layer, ensure it is attached under the child's layer
+             if (childNativeView.outerShadowContainerLayer && !childNativeView.outerShadowContainerLayer.superlayer) {
+diff --git a/node_modules/@nativescript/core/ui/page/index.ios.js b/node_modules/@nativescript/core/ui/page/index.ios.js
+index c013e16..e2c718a 100644
+--- a/node_modules/@nativescript/core/ui/page/index.ios.js
++++ b/node_modules/@nativescript/core/ui/page/index.ios.js
+@@ -444,7 +444,7 @@ export class Page extends PageBase {
+                 nativeParent.addSubview(nativeChild);
+             }
+             else {
+-                nativeParent.insertSubviewAtIndex(nativeChild, atIndex);
++                nativeParent.insertSubviewBelowSubview(nativeChild, nativeParent.subviews.objectAtIndex(atIndex));
+             }
+             return true;
+         }
+diff --git a/node_modules/@nativescript/core/ui/scroll-view/index.ios.js b/node_modules/@nativescript/core/ui/scroll-view/index.ios.js
+index b094853..442a6a1 100644
+--- a/node_modules/@nativescript/core/ui/scroll-view/index.ios.js
++++ b/node_modules/@nativescript/core/ui/scroll-view/index.ios.js
+@@ -134,15 +134,21 @@ export class ScrollView extends ScrollViewBase {
+         this.updateContentInsetAdjustmentBehavior(value);
+     }
+     scrollToVerticalOffset(value, animated) {
+-        if (this.nativeViewProtected && this.orientation === 'vertical' && this.isScrollEnabled) {
+-            const bounds = this.nativeViewProtected.bounds.size;
+-            this.nativeViewProtected.scrollRectToVisibleAnimated(CGRectMake(0, value, bounds.width, bounds.height), animated);
++        const nativeView = this.nativeViewProtected;
++        if (nativeView && this.orientation === 'vertical' && this.isScrollEnabled) {
++            const inset = nativeView.adjustedContentInset;
++            const min = -inset.top;
++            const max = Math.max(min, nativeView.contentSize.height + inset.bottom - nativeView.bounds.size.height);
++            nativeView.setContentOffsetAnimated(CGPointMake(nativeView.contentOffset.x, Math.min(Math.max(value, min), max)), animated);
+         }
+     }
+     scrollToHorizontalOffset(value, animated) {
+-        if (this.nativeViewProtected && this.orientation === 'horizontal' && this.isScrollEnabled) {
+-            const bounds = this.nativeViewProtected.bounds.size;
+-            this.nativeViewProtected.scrollRectToVisibleAnimated(CGRectMake(value, 0, bounds.width, bounds.height), animated);
++        const nativeView = this.nativeViewProtected;
++        if (nativeView && this.orientation === 'horizontal' && this.isScrollEnabled) {
++            const inset = nativeView.adjustedContentInset;
++            const min = -inset.left;
++            const max = Math.max(min, nativeView.contentSize.width + inset.right - nativeView.bounds.size.width);
++            nativeView.setContentOffsetAnimated(CGPointMake(Math.min(Math.max(value, min), max), nativeView.contentOffset.y), animated);
+         }
+     }
+     onMeasure(widthMeasureSpec, heightMeasureSpec) {
+diff --git a/node_modules/@nativescript/core/ui/styling/background.android.js b/node_modules/@nativescript/core/ui/styling/background.android.js
+index 8c0848c..7fabc61 100644
+--- a/node_modules/@nativescript/core/ui/styling/background.android.js
++++ b/node_modules/@nativescript/core/ui/styling/background.android.js
+@@ -1,3 +1,4 @@
++import { resolveGradientStopOffsets } from './linear-gradient';
+ import { LinearGradient } from './linear-gradient';
+ import { ClipPathFunction } from './clip-path-function';
+ import { isDataURI, isFileOrResourcePath, RESOURCE_PREFIX, FILE_PREFIX } from '../../utils';
+@@ -11,20 +12,17 @@ function fromBase64(source) {
+ function fromGradient(gradient) {
+     const colors = Array.create('int', gradient.colorStops.length);
+     const stops = Array.create('float', gradient.colorStops.length);
+-    let hasStops = false;
++    const offsets = resolveGradientStopOffsets(gradient.colorStops);
+     gradient.colorStops.forEach((stop, index) => {
+         colors[index] = stop.color.android;
+-        if (stop.offset) {
+-            stops[index] = stop.offset.value;
+-            hasStops = true;
+-        }
++        stops[index] = offsets[index];
+     });
+     const alpha = gradient.angle / (Math.PI * 2);
+     const startX = Math.pow(Math.sin(Math.PI * (alpha + 0.75)), 2);
+     const startY = Math.pow(Math.sin(Math.PI * (alpha + 0.5)), 2);
+     const endX = Math.pow(Math.sin(Math.PI * (alpha + 0.25)), 2);
+     const endY = Math.pow(Math.sin(Math.PI * alpha), 2);
+-    return new org.nativescript.widgets.LinearGradientDefinition(startX, startY, endX, endY, colors, hasStops ? stops : null);
++    return new org.nativescript.widgets.LinearGradientDefinition(startX, startY, endX, endY, colors, stops);
+ }
+ const pattern = /url\(('|")(.*?)\1\)/;
+ export function refreshBorderDrawable(view, borderDrawable) {
+diff --git a/node_modules/@nativescript/core/ui/styling/background.ios.js b/node_modules/@nativescript/core/ui/styling/background.ios.js
+index ed4b688..df176c9 100644
+--- a/node_modules/@nativescript/core/ui/styling/background.ios.js
++++ b/node_modules/@nativescript/core/ui/styling/background.ios.js
+@@ -976,7 +976,7 @@ function drawBoxShadow(view) {
+             shadowLayer.shadowOpacity = boxShadow.color?.a ? boxShadow.color.a / 255 : 1;
+             // Use this multiplier to imitate CSS shadow blur
+             shadowLayer.shadowRadius = shadowRadius * 0.5;
+-            shadowLayer.shadowColor = boxShadow.color?.ios?.CGColor;
++            shadowLayer.shadowColor = boxShadow.color?.ios?.colorWithAlphaComponent(1)?.CGColor;
+             shadowLayer.shadowOffset = CGSizeMake(offsetX, offsetY);
+             // Apply spread radius by expanding shadow layer bounds (this has a nice glow with radii set to 0)
+             shadowLayer.shadowPath = shadowPath;
+diff --git a/node_modules/@nativescript/core/ui/styling/linear-gradient.js b/node_modules/@nativescript/core/ui/styling/linear-gradient.js
+index d688998..fae820b 100644
+--- a/node_modules/@nativescript/core/ui/styling/linear-gradient.js
++++ b/node_modules/@nativescript/core/ui/styling/linear-gradient.js
+@@ -1,4 +1,42 @@
+ import { Color } from '../../color';
++/**
++ * Positions for every color stop, per CSS: a first stop without a position
++ * sits at 0, a last one at 1, a run of unpositioned stops is spread evenly
++ * between its positioned neighbours, and a position lower than one before it
++ * is raised to that value.
++ */
++export function resolveGradientStopOffsets(colorStops) {
++    const count = colorStops.length;
++    const offsets = colorStops.map((stop) => (stop.offset ? stop.offset.value : undefined));
++    if (count === 0) {
++        return [];
++    }
++    if (offsets[0] === undefined) {
++        offsets[0] = 0;
++    }
++    if (offsets[count - 1] === undefined) {
++        offsets[count - 1] = 1;
++    }
++    let highest = offsets[0];
++    for (let i = 1; i < count; i++) {
++        if (offsets[i] !== undefined) {
++            offsets[i] = Math.max(offsets[i], highest);
++            highest = offsets[i];
++        }
++    }
++    let start = 0;
++    for (let i = 1; i < count; i++) {
++        if (offsets[i] === undefined) {
++            continue;
++        }
++        const gap = i - start;
++        for (let k = start + 1; k < i; k++) {
++            offsets[k] = offsets[start] + ((offsets[i] - offsets[start]) * (k - start)) / gap;
++        }
++        start = i;
++    }
++    return offsets;
++}
+ export class LinearGradient {
+     static parse(value) {
+         const result = new LinearGradient();
+diff --git a/node_modules/@nativescript/core/ui/utils.ios.js b/node_modules/@nativescript/core/ui/utils.ios.js
+index 800f0fc..5757e2e 100644
+--- a/node_modules/@nativescript/core/ui/utils.ios.js
++++ b/node_modules/@nativescript/core/ui/utils.ios.js
+@@ -1,3 +1,4 @@
++import { resolveGradientStopOffsets } from './styling/linear-gradient';
+ import { Screen } from '../platform';
+ import * as utils from '../utils';
+ export var ios;
+@@ -41,18 +42,13 @@ export var ios;
+         gradientLayer.contentsScale = Screen.mainScreen.scale;
+         const iosColors = NSMutableArray.alloc().initWithCapacity(gradient.colorStops.length);
+         const iosStops = NSMutableArray.alloc().initWithCapacity(gradient.colorStops.length);
+-        let hasStops = false;
+-        gradient.colorStops.forEach((stop) => {
++        const offsets = resolveGradientStopOffsets(gradient.colorStops);
++        gradient.colorStops.forEach((stop, index) => {
+             iosColors.addObject(stop.color.ios.CGColor);
+-            if (stop.offset) {
+-                iosStops.addObject(stop.offset.value);
+-                hasStops = true;
+-            }
++            iosStops.addObject(offsets[index]);
+         });
+         gradientLayer.colors = iosColors;
+-        if (hasStops) {
+-            gradientLayer.locations = iosStops;
+-        }
++        gradientLayer.locations = iosStops;
+         const alpha = gradient.angle / (Math.PI * 2);
+         const startX = Math.pow(Math.sin(Math.PI * (alpha + 0.75)), 2);
+         const startY = Math.pow(Math.sin(Math.PI * (alpha + 0.5)), 2);
+diff --git a/node_modules/@nativescript/core/utils/native-helper-for-android.js b/node_modules/@nativescript/core/utils/native-helper-for-android.js
+index 551231e..8d984f2 100644
+--- a/node_modules/@nativescript/core/utils/native-helper-for-android.js
++++ b/node_modules/@nativescript/core/utils/native-helper-for-android.js
+@@ -276,6 +276,24 @@ const DefaultDarkScrim = new Color(0x80, 0x1b, 0x1b, 0x1b);
+ const DefaultStatusBarLight = new Color(0);
+ const DefaultStatusBarDark = new Color(0);
+ const systemColors = new WeakMap();
++/**
++ * Re-applies the activity's edge-to-edge styling. The system bar icon
++ * appearance is decided from the theme at the time the style is applied, so
++ * an activity that survives a dark-mode switch keeps the old icons until this
++ * runs again.
++ */
++export function refreshEdgeToEdge(activity) {
++    if (!activity) {
++        return;
++    }
++    const existingColors = systemColors.get(activity);
++    if (existingColors) {
++        setEnableEdgeToEdge(activity, existingColors);
++    }
++    else {
++        enableEdgeToEdge(activity);
++    }
++}
+ function setEnableEdgeToEdge(activity, existingColors) {
+     enableEdgeToEdge(activity, {
+         statusBarLightColor: existingColors.statusBarLight,
+diff --git a/node_modules/@nativescript/core/utils/native-helper.android.js b/node_modules/@nativescript/core/utils/native-helper.android.js
+index 2252bf7..c2b7cd0 100644
+--- a/node_modules/@nativescript/core/utils/native-helper.android.js
++++ b/node_modules/@nativescript/core/utils/native-helper.android.js
+@@ -1,6 +1,6 @@
+ import { platformCheck } from './platform-check';
+ // importing this helper as a separate file avoids "android" symbol clash with the global android object
+-import { resources, collections, getWindow, getApplication, getCurrentActivity, getApplicationContext, getResources, getPackageName, getInputMethodManager, showSoftInput, dismissSoftInput, enableEdgeToEdge, setDarkModeHandler, setNavigationBarColor, setStatusBarColor, getIgnoreEdgeToEdgeOnOlderDevices, setIgnoreEdgeToEdgeOnOlderDevices } from './native-helper-for-android';
++import { resources, collections, getWindow, getApplication, getCurrentActivity, getApplicationContext, getResources, getPackageName, getInputMethodManager, showSoftInput, dismissSoftInput, enableEdgeToEdge, refreshEdgeToEdge, setDarkModeHandler, setNavigationBarColor, setStatusBarColor, getIgnoreEdgeToEdgeOnOlderDevices, setIgnoreEdgeToEdgeOnOlderDevices } from './native-helper-for-android';
+ export { dataSerialize, dataDeserialize } from './native-helper-for-android';
+ export { getWindow } from './native-helper-for-android';
+ export const android = {
+@@ -16,6 +16,7 @@ export const android = {
+     showSoftInput,
+     dismissSoftInput,
+     enableEdgeToEdge,
++    refreshEdgeToEdge,
+     setStatusBarColor,
+     setNavigationBarColor,
+     setDarkModeHandler,

@@ -9,12 +9,11 @@
     "noEmitOnError": true,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "jsxImportSource": "nativescript-jsx",
+    "jsxImportSource": "@nativescript-community/octane",
     "lib": ["ESNext"],
     "paths": {
       "~/*": ["./src/*"],
-      "@/*": ["./src/*"],
-      "nativescript-jsx/jsx-runtime": ["./src/octane/intrinsics.ts"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
