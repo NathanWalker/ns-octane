@@ -28,10 +28,6 @@ index 124944e..9007c0d 100644
      getNativeApplication() {
          let nativeApp = this.nativeApp;
          if (nativeApp) {
-diff --git a/node_modules/@nativescript/core/platforms/android/core.aar b/node_modules/@nativescript/core/platforms/android/core.aar
-new file mode 100644
-index 0000000..09b3af4
-Binary files /dev/null and b/node_modules/@nativescript/core/platforms/android/core.aar differ
 diff --git a/node_modules/@nativescript/core/ui/core/view/index.ios.js b/node_modules/@nativescript/core/ui/core/view/index.ios.js
 index 9a2ed97..7d3ef2c 100644
 --- a/node_modules/@nativescript/core/ui/core/view/index.ios.js

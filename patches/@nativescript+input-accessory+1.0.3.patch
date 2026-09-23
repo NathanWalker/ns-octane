@@ -323,7 +323,7 @@ index c257c08..1048fca 100644
          if (this.textView && (!this.textView.text || this.textView.text.length === 0)) {
              const hint = this.textView.hint;
 diff --git a/node_modules/@nativescript/input-accessory/platforms/ios/src/KeyboardTrackingView.swift b/node_modules/@nativescript/input-accessory/platforms/ios/src/KeyboardTrackingView.swift
-index b53336f..603e05b 100644
+index b53336f..cb2ac21 100644
 --- a/node_modules/@nativescript/input-accessory/platforms/ios/src/KeyboardTrackingView.swift
 +++ b/node_modules/@nativescript/input-accessory/platforms/ios/src/KeyboardTrackingView.swift
 @@ -32,6 +32,12 @@ public class KeyboardTrackingView: UIView {
@@ -705,7 +705,16 @@ index b53336f..603e05b 100644
  
          // contentInset covers the full keyboard+accessory area from the screen bottom.
          // Clamp to at least the accessory height — the accessory is always visible
-@@ -775,6 +977,10 @@ class InputAccessoryContainerView: UIInputView {
+@@ -769,12 +971,19 @@ public class KeyboardTrackingView: UIView {
+  * Custom input accessory container that properly sizes itself and supports dynamic height.
+  * Uses an internal height constraint which is the reliable way to resize inputAccessoryViews.
+  * Extends UIInputView with .keyboard style so the background matches the system keyboard exactly.
++ * On iOS 26+ it is transparent instead: the tracked scroll view's edge effect (registered through
++ * UIScrollEdgeElementContainerInteraction) is the bar's background, and the keyboard material
++ * would sit on top of it.
+  */
+ class InputAccessoryContainerView: UIInputView {
+ 
      var safeAreaBottomInset: CGFloat = 0
      var contentHeight: CGFloat = 48
  
@@ -716,7 +725,23 @@ index b53336f..603e05b 100644
      // Direct reference to the NativeScript content view
      weak var contentViewRef: UIView?
  
-@@ -815,7 +1021,7 @@ class InputAccessoryContainerView: UIInputView {
+@@ -784,7 +993,14 @@ class InputAccessoryContainerView: UIInputView {
+     init(frame: CGRect) {
+         // .keyboard style gives the exact same translucent blur as the system keyboard.
+         // No separate UIVisualEffectView needed — the accessory blends seamlessly.
+-        super.init(frame: frame, inputViewStyle: .keyboard)
++        // Where the scroll edge effect exists it plays that role, so the bar stays clear.
++        let style: UIInputView.Style
++        if #available(iOS 26.0, *) {
++            style = .default
++        } else {
++            style = .keyboard
++        }
++        super.init(frame: frame, inputViewStyle: style)
+ 
+         self.allowsSelfSizing = true
+ 
+@@ -815,7 +1031,7 @@ class InputAccessoryContainerView: UIInputView {
          super.layoutSubviews()
          // Enforce content view positioning on every layout pass.
          if let contentView = contentViewRef {

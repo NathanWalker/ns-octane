@@ -13,6 +13,7 @@ import type { MenuAction } from "@nstudio/nativescript-menu";
 import { useEffect, useRef, useState, useSyncExternalStore } from "octane";
 import {
   accessory,
+  installComposerBackdrop,
   COMPOSER_FONT_SIZE,
   COMPOSER_PILL_BORDER as PILL_BORDER,
   COMPOSER_PILL_HEIGHT as PILL_HEIGHT,
@@ -69,6 +70,7 @@ export function Composer({ row, scrollViewRef, scrollReady }: ComposerProps) {
     });
     managerRef.current = manager;
     accessory.current = manager;
+    installComposerBackdrop();
 
     // Center a single line in the pill via CSS padding, never by writing
     // UITextView.textContainerInset natively — core re-maps CSS padding onto

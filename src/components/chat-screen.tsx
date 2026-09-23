@@ -4,6 +4,7 @@ import {
   isAndroid,
   isIOS,
   type EventData,
+  type GridLayout,
   type ScrollEventData,
   type ScrollView,
   type StackLayout,
@@ -24,12 +25,17 @@ import { safeAreaInsets } from "../ui/safe-area";
 import { selectHaptic, tapHaptic } from "../ui/haptics";
 import { icons } from "../ui/icons";
 import { slideWithKeyboard } from "../ui/keyboard";
+import { attachScrollEdgeContainer, hasNativeScrollEdges, setSoftScrollEdges } from "../ui/scroll-edge";
 import { SfIcon } from "../ui/sf-icon";
 import { shareConversation } from "../ui/share";
 import { Streamdown } from "../ui/streamdown";
 import { Composer } from "./composer";
 
 const TOP_BAR_HEIGHT = 56;
+
+// On iOS 26+ UIKit blurs and washes content under the top bar and the docked
+// composer itself, so the gradient layers below are for Android and older iOS.
+const NATIVE_EDGES = hasNativeScrollEdges();
 
 /**
  * The offset that shows the end of the content. `scrollableHeight` ignores the
@@ -56,13 +62,15 @@ interface TopBarProps {
   chatMenu: MenuAction[] | null;
   onMenu: () => void;
   onNewChat: () => void;
+  barRef: { current: GridLayout | null };
 }
 
-function TopBar({ chatMenu, onMenu, onNewChat }: TopBarProps) {
+function TopBar({ chatMenu, onMenu, onNewChat, barRef }: TopBarProps) {
   const hasChat = chatMenu !== null;
   const androidTop = isAndroid ? safeAreaInsets().top : 0;
   return (
     <gridlayout
+      ref={barRef}
       row={0}
       rows="auto"
       columns="auto, *, auto"
@@ -146,7 +154,7 @@ const SUGGESTIONS = [
 /** Space between the last suggestion row and the composer bar. */
 const SUGGESTION_GAP = 50;
 /** Clearance between the scroll-to-bottom button and the composer bar. */
-const FAB_GAP = 10;
+const FAB_GAP = 6;
 
 interface EmptyStateProps {
   suggestRef: { current: StackLayout | null };
@@ -232,6 +240,8 @@ export function ChatScreen({ onMenu }: ChatScreenProps) {
 
   const scrollRef = useRef<ScrollView | null>(null);
   const suggestRef = useRef<StackLayout | null>(null);
+  const fadeRef = useRef<StackLayout | null>(null);
+  const barRef = useRef<GridLayout | null>(null);
   const followRef = useRef(true);
   const [scrollReady, setScrollReady] = useState(false);
   const [fabVisible, setFabVisible] = useState(false);
@@ -267,6 +277,9 @@ export function ChatScreen({ onMenu }: ChatScreenProps) {
   // row, whose bottom edge is the composer on Android but the safe-area line
   // on iOS, where the bar floats in the keyboard window.
   const fabMargin = isIOS ? FAB_GAP + dockedComposerHeight() - safeAreaInsets().bottom : FAB_GAP;
+  // The fade ends where the docked bar begins; the bar paints the canvas from
+  // there down (see installComposerBackdrop).
+  const fadeMargin = isIOS ? dockedComposerHeight() - safeAreaInsets().bottom : 0;
   // The root page skips the system-bar insets on Android (see index.ts); the
   // chrome pads itself so the canvas and the scrolled content run under the
   // bars while the top bar and the docked composer stay clear of them. IME
@@ -295,10 +308,23 @@ export function ChatScreen({ onMenu }: ChatScreenProps) {
         liftRef.current = lift;
         const view = suggestRef.current;
         if (view) slideWithKeyboard(view, -lift, info);
+        const fade = fadeRef.current;
+        if (fade) slideWithKeyboard(fade, -lift, info);
       },
     );
     return () => center.removeObserver(observer);
   }, []);
+
+  // The top bar registers as the bar the content scrolls under; the accessory
+  // plugin registers the docked composer the same way, keyboard included.
+  useEffect(() => {
+    if (!NATIVE_EDGES || !scrollReady) return;
+    const scrollView = scrollRef.current;
+    const bar = barRef.current;
+    if (!scrollView || !bar) return;
+    setSoftScrollEdges(scrollView);
+    return attachScrollEdgeContainer(scrollView, bar, "top");
+  }, [scrollReady]);
 
   const onScroll = (args: EventData) => {
     const scrollView = scrollRef.current;
@@ -369,20 +395,37 @@ export function ChatScreen({ onMenu }: ChatScreenProps) {
         />
       ) : null}
 
+      {/* Abuts the docked bar, which rides in the keyboard's window; the frame
+          observer above lifts it in step. Declared before the button so the
+          button sits on top of it. */}
+      {!NATIVE_EDGES ? (
+        <stacklayout
+          row={0}
+          ref={fadeRef}
+          class="bottom-fade"
+          verticalAlignment="bottom"
+          marginBottom={fadeMargin}
+          translateY={-liftRef.current}
+          isUserInteractionEnabled={false}
+        />
+      ) : null}
+
       {/* Painted separately, behind the bar: a child's box-shadow composites
           under its parent's background, so a bar-owned fade would hide the
           button shadows. Laid out inside the safe area and then expanded to
           the physical top, so its height is the bar band only and its bottom
           edge lands exactly where the content's top padding ends: nothing is
           washed out until content scrolls up into it. */}
-      <stacklayout
-        row={0}
-        class="top-bar-fade"
-        verticalAlignment="top"
-        height={TOP_BAR_HEIGHT + androidInsets.top}
-        iosOverflowSafeArea={true}
-        isUserInteractionEnabled={false}
-      />
+      {!NATIVE_EDGES ? (
+        <stacklayout
+          row={0}
+          class="top-bar-fade"
+          verticalAlignment="top"
+          height={TOP_BAR_HEIGHT + androidInsets.top}
+          iosOverflowSafeArea={true}
+          isUserInteractionEnabled={false}
+        />
+      ) : null}
 
       {fabVisible ? (
         <SfIcon
@@ -405,6 +448,7 @@ export function ChatScreen({ onMenu }: ChatScreenProps) {
       ) : null}
 
       <TopBar
+        barRef={barRef}
         chatMenu={chatMenu}
         onMenu={onMenu}
         onNewChat={() => {

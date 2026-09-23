@@ -94,6 +94,19 @@ TextField {
   background: linear-gradient(to bottom, rgba(33, 33, 33, 0) 0%, rgba(32, 32, 33, 0.9) 60%, rgba(28, 28, 29, 1) 100%);
 }
 
+/* Android and iOS before 26 (iOS 26+ lets UIKit blur the edges instead):
+   content fades into the canvas just above the docked composer, and on iOS the
+   bar paints the same canvas value beneath itself (see installComposerBackdrop)
+   so the two meet without a seam. One line, as above. */
+.bottom-fade {
+  height: 48;
+  background: linear-gradient(to bottom, rgba(244, 244, 245, 0) 0%, rgba(244, 244, 245, 0.5) 45%, rgba(244, 244, 245, 0.9) 80%, rgba(244, 244, 245, 1) 100%);
+}
+
+.ns-dark .bottom-fade {
+  background: linear-gradient(to bottom, rgba(28, 28, 29, 0) 0%, rgba(28, 28, 29, 0.5) 45%, rgba(28, 28, 29, 0.9) 80%, rgba(28, 28, 29, 1) 100%);
+}
+
 .text-primary {
   color: #0d0d0d;
 }
@@ -112,17 +125,19 @@ TextField {
 
 /* ---------------------------------------------------------------- top bar */
 
-/* Content scrolls under the status bar and shows through it faintly; the wash
-   holds through the band the bar's buttons float in (so their shadows land on
-   a light ground) and clears just below them. Percentages are of the expanded
-   layer: the status bar ends at 52%, the buttons at 95%. Gradient values must
-   stay on one line. */
+/* Android and iOS before 26 (iOS 26+ lets UIKit blur the edges instead):
+   content scrolls under the status bar and shows through it faintly; the wash
+   holds through the status bar and ramps out across the band the bar's buttons
+   float in. The ramp must stay gradual all the way to zero: a wash that holds
+   and then drops within a few points reads as a hard line wherever dark
+   content (a code card) passes under the bar. Percentages are of the expanded
+   layer: the status bar ends near 52%. Gradient values must stay on one line. */
 .top-bar-fade {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.8) 52%, rgba(255, 255, 255, 0.7) 84%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.88) 50%, rgba(255, 255, 255, 0.76) 64%, rgba(255, 255, 255, 0.54) 77%, rgba(255, 255, 255, 0.28) 89%, rgba(255, 255, 255, 0.09) 96%, rgba(255, 255, 255, 0) 100%);
 }
 
 .ns-dark .top-bar-fade {
-  background: linear-gradient(to bottom, rgba(33, 33, 33, 0.82) 0%, rgba(33, 33, 33, 0.8) 52%, rgba(33, 33, 33, 0.7) 84%, rgba(33, 33, 33, 0) 100%);
+  background: linear-gradient(to bottom, rgba(33, 33, 33, 0.9) 0%, rgba(33, 33, 33, 0.88) 50%, rgba(33, 33, 33, 0.76) 64%, rgba(33, 33, 33, 0.54) 77%, rgba(33, 33, 33, 0.28) 89%, rgba(33, 33, 33, 0.09) 96%, rgba(33, 33, 33, 0) 100%);
 }
 
 .icon-circle {
@@ -425,8 +440,10 @@ TextField {
 
 /* ---------------------------------------------------------------- composer */
 
+/* The top padding is where the bar begins for the scroll view's edge effect:
+   content starts to blur and wash out this far above the pill. */
 .composer-row {
-  padding: 4 12 8 12;
+  padding: 12 12 8 12;
   background-color: transparent;
 }
 

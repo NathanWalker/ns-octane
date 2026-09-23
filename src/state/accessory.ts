@@ -1,12 +1,13 @@
 import type { InputAccessoryManager } from "@nativescript/input-accessory";
 import { isIOS } from "@nativescript/core";
 import { safeAreaInsets } from "../ui/safe-area";
+import { hasNativeScrollEdges } from "../ui/scroll-edge";
 
 export const COMPOSER_PILL_HEIGHT = 52;
 /** `.composer-pill`'s border, inside the pill height. */
 export const COMPOSER_PILL_BORDER = 1;
-/** `.composer-row`'s vertical padding: 4 top + 8 bottom. */
-export const COMPOSER_ROW_PADDING = 12;
+/** `.composer-row`'s vertical padding: 12 top + 8 bottom. */
+export const COMPOSER_ROW_PADDING = 20;
 /**
  * Set on the TextView as a property rather than in CSS: the composer sizes its
  * text insets from the font at load time, and a CSS font lands after that.
@@ -47,11 +48,46 @@ export function restoreComposer(): void {
   accessory.current?.restore();
 }
 
-/** The native container the accessory plugin docks the composer into, once set up. */
-function accessoryContainer(): UIView | null {
+/** The composer's own native view, as the accessory plugin docked it. */
+function composerContent(): UIView | null {
   if (!isIOS) return null;
   const manager = accessory.current as (InputAccessoryManager & { inputContainerView?: UIView }) | null;
-  return manager?.inputContainerView?.superview ?? null;
+  return manager?.inputContainerView ?? null;
+}
+
+/** The native container the accessory plugin docks the composer into, once set up. */
+function accessoryContainer(): UIView | null {
+  return composerContent()?.superview ?? null;
+}
+
+const BACKDROP_TAG = 0x0c7a9e1f;
+
+/**
+ * Before iOS 26 the plugin docks the composer in a keyboard-style UIInputView,
+ * which draws the system keyboard's material across the bar's full width; over
+ * dark content that is a gray band with a hard top edge, and nothing in the
+ * page can cover it, since the bar's window sits above the page's. An opaque
+ * view between the material and the composer hides it. The colors are the
+ * bottom stops of `.screen-canvas`; `.bottom-fade` runs content into the same
+ * value just above the bar. On iOS 26+ the container is transparent and the
+ * scroll view's edge effect is the bar's background, so nothing is added. Safe
+ * to call again: a container that already carries the backdrop is left alone.
+ */
+export function installComposerBackdrop(): void {
+  if (hasNativeScrollEdges()) return;
+  const content = composerContent();
+  const container = content?.superview;
+  if (!content || !container || container.viewWithTag(BACKDROP_TAG)) return;
+  const backdrop = UIView.alloc().initWithFrame(container.bounds);
+  backdrop.tag = BACKDROP_TAG;
+  backdrop.userInteractionEnabled = false;
+  backdrop.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+  backdrop.backgroundColor = UIColor.colorWithDynamicProvider((traits: UITraitCollection) =>
+    traits.userInterfaceStyle === UIUserInterfaceStyle.Dark
+      ? UIColor.colorWithRedGreenBlueAlpha(28 / 255, 28 / 255, 29 / 255, 1)
+      : UIColor.colorWithRedGreenBlueAlpha(244 / 255, 244 / 255, 245 / 255, 1),
+  );
+  container.insertSubviewBelowSubview(backdrop, content);
 }
 
 /**
